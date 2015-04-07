@@ -47,7 +47,7 @@ different application instances will hold different versions of the
 data in their caches. Therefore, the same query performed by these 
 instances could return different results, as shown in Figure 1.
 
-<img src="Caching/Figure1.png" class="img-responsive img-thumbnail" />
+![Using an in-memory cache in different instances of an application](Caching/Figure1.png)
 
 _Figure 1: Using an in-memory cache in different instances of an application_
 
