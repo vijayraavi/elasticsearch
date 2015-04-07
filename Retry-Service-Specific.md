@@ -4,7 +4,7 @@
 
 Most Azure services and client SDKs include a retry mechanism. However, these differ because each service has different characteristics and requirements, and so each retry mechanism is tuned to a specific service. This guide summarizes the retry mechanism features for the majority of Azure services, and includes information to help you use, adapt, or extend the retry mechanism for that service.
 
-For general guidance on handling transient faults, and retrying connections and operations against services and resources, see [Retry guidance](https://github.com/mspnp/azure-guidance/Retry-General.md).
+For general guidance on handling transient faults, and retrying connections and operations against services and resources, see [Retry guidance](https://github.com/mspnp/azure-guidance/blob/master/Retry-General.md).
 
 The following table summarizes the retry features for the Azure services described in this guidance. 
 

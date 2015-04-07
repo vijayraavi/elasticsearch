@@ -4,7 +4,7 @@
 
 All applications that communicate with remote services and resources must be sensitive to transient faults. This is especially the case for applications that run in the cloud, where the nature of the environment and connectivity over the Internet means these types of faults are likely to be encountered more often. Transient faults include the momentary loss of network connectivity to components and services, the temporary unavailability of a service, or timeouts that arise when a service is busy. These faults are often self-correcting, and if the action is repeated after a suitable delay it is likely succeed. 
 
-This document covers general guidance for transient fault handling. For information about handling transient faults when using Microsoft Azure services, see [Azure service-specific retry guidelines](http://azurewiki/Retry-Service-Specific).
+This document covers general guidance for transient fault handling. For information about handling transient faults when using Microsoft Azure services, see [Azure service-specific retry guidelines](https://github.com/mspnp/azure-guidance/blob/master/Retry-Service-Specific.md).
 
 # Why do transient faults occur in the cloud?
 
@@ -85,7 +85,7 @@ The following guidelines will help you to design a suitable transient fault hand
 
 # More information
 
-* [Azure service-specific retry guidelines](http://azurewiki/Guidance/Retry-Service-Specific)
+* [Azure service-specific retry guidelines](https://github.com/mspnp/azure-guidance/blob/master/Retry-Service-Specific.md)
 * [The Transient Fault Handling Application Block](http://msdn.microsoft.com/en-us/library/hh680934.aspx)
 * [Circuit Breaker Pattern](http://msdn.microsoft.com/en-us/library/dn589784.aspx)
 * [Compensating Transaction Pattern](http://msdn.microsoft.com/en-us/library/dn589804.aspx)
