@@ -1,16 +1,4 @@
-﻿---
-Source File Name: CDN-ppContentTemplateV2.docx
-AssetID: e5118d0f-671d-4416-b6d2-edbf35df3e3a
-Title: Content Delivery Network (CDN)
-Order In ToC: 1
-Output Filename: 1_Content Delivery Network (CDN).markdown
----
-
-#### Content Delivery Network (CDN) ####
-# Content Delivery Network (CDN) #
-----------
-
-
+﻿# Content Delivery Network (CDN) guidance
 
 # Overview #
 The Microsoft Azure Content Delivery Network (CDN) offers developers a global solution for delivering high-bandwidth content that is hosted in Azure. The CDN caches publicly available objects loaded from Azure blob storage or an application folder at strategically placed locations to provide maximum bandwidth for delivering content to users. It is typically used for delivering static content such as images, style sheets, documents, files, client-side scripts, and HTML pages.  
