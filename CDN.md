@@ -4,7 +4,7 @@
 The Microsoft Azure Content Delivery Network (CDN) offers developers a global solution for delivering high-bandwidth content that is hosted in Azure. The CDN caches publicly available objects loaded from Azure blob storage or an application folder at strategically placed locations to provide maximum bandwidth for delivering content to users. It is typically used for delivering static content such as images, style sheets, documents, files, client-side scripts, and HTML pages.  
 The major advantages of using the CDN are lower latency and faster delivery of content to users irrespective of their geographical location in relation to the datacenter where the application is hosted, and a reduction in the load on the application itself because it is relieved of the processing required to access and deliver the content. This reduction in load can help to increase the performance and scalability of the application, as well as minimizing hosting cost by reducing the processing resources required to achieve a specific level of performance and availability.    
 You may be able to use other content delivery network systems that are not implemented by Azure in your applications if the Azure CDN does not meet your needs. Alternatively, you may be able to use the Azure CDN for applications hosted with other providers by exposing the static content in Azure storage or in Azure compute instances.  
-![](Figures/CDN/CDN.png)
+![](figures/CDN/CDN.png)
 
 # How and why the CDN is used #
 Typical uses for the CDN include:  
