@@ -4,7 +4,7 @@
 
 Most Azure services and client SDKs include a retry mechanism. However, these differ because each service has different characteristics and requirements, and so each retry mechanism is tuned to a specific service. This guide summarizes the retry mechanism features for the majority of Azure services, and includes information to help you use, adapt, or extend the retry mechanism for that service.
 
-For general guidance on handling transient faults, and retrying connections and operations against services and resources, see [Retry guidance](http://azurewiki/Retry-General).
+For general guidance on handling transient faults, and retrying connections and operations against services and resources, see [Retry guidance](https://github.com/mspnp/azure-guidance/Retry-General.md).
 
 The following table summarizes the retry features for the Azure services described in this guidance. 
 
@@ -264,8 +264,7 @@ For more information, see [Code-Based Configuration (EF6 onwards)](http://msdn.m
 
 The following table shows the default settings for the built-in retry policy when using EF6.
 
-<img src="Architecture/RetryServiceSpecific/RetryServiceSpecificGuidanceTable4.png" class="img-responsive img-thumbnail" />
-
+![](figures/RetryServiceSpecific/RetryServiceSpecificGuidanceTable4.png)
 ## Retry usage guidance
 
 Consider the following guidelines when accessing SQL Database using EF6:
@@ -527,8 +526,7 @@ client.RetryPolicy = new RetryExponential(minBackoff: TimeSpan.FromSeconds(0.1),
 The retry policy cannot be set at the individual operation level. It applies to all operations for the messaging client.
 The following table shows the default settings for the built-in retry policy.
 
-<img src="Architecture/RetryServiceSpecific/RetryServiceSpecificGuidanceTable7.png" class="img-responsive img-thumbnail" />
-  
+![](figures/RetryServiceSpecific/RetryServiceSpecificGuidanceTable7.png)
 
 ## Retry usage guidance
 
@@ -539,7 +537,8 @@ Consider the following guidelines when using Service Bus:
 
 Consider starting with following settings for retrying operations. These are general purpose settings, and you should monitor the operations and fine tune the values to suit your own scenario.
 
-<img src="Architecture/RetryServiceSpecific/RetryServiceSpecificGuidanceTable8.png" class="img-responsive img-thumbnail" />
+
+![](figures/RetryServiceSpecific/RetryServiceSpecificGuidanceTable8.png)
 
 ## Telemetry
 

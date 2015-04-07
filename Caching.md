@@ -47,7 +47,7 @@ different application instances will hold different versions of the
 data in their caches. Therefore, the same query performed by these 
 instances could return different results, as shown in Figure 1.
 
-![Using an in-memory cache in different instances of an application](Figures/Caching/Figure1.png)
+![Using an in-memory cache in different instances of an application](figures/Caching/Figure1.png)
 
 _Figure 1: Using an in-memory cache in different instances of an application_
 
@@ -59,7 +59,7 @@ caching ensures that different application instances see the same
 view of cached data by locating the cache in a separate location, 
 typically hosted as part of a separate service, as shown in Figure 2.
 
-![Using a shared cache_](Figures/Caching/Figure2.png)
+![Using a shared cache_](figures/Caching/Figure2.png)
 _Figure 2: Using a shared cache_
 
 An important benefit of using the shared caching approach is the 
@@ -278,7 +278,7 @@ cache becoming too stale with respect to the shared cache, but it
 acts as a buffer if the shared cache is unreachable. Figure 3 
 shows this structure.
 
-![Using a local, private cache with a shared cache_](Figures/Caching/Caching3.png)
+![Using a local, private cache with a shared cache_](figures/Caching/Caching3.png)
 _Figure 3: Using a local, private cache with a shared cache_
 
 To support large caches that hold relatively long-lived data, some 
