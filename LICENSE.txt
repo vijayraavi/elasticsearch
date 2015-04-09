@@ -1,4 +1,4 @@
-Performance Optimization Guidance
+Azure Guidance
 
 Copyright (c) Microsoft Corporation
 
