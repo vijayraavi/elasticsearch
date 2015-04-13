@@ -15,34 +15,39 @@ The REST model uses a navigational scheme to represent business objects and serv
 
 Another crucial point in implementing an effective REST model is to understand the relationships between the various resources to which the model provides access. These resources are typically organized as collections and relationships. For example, in the ecommerce system described earlier, a quick analysis shows that there are two collections involved: orders and customers. Each order and customer should have its own unique key for identification purposes. The URI to access the collection of orders could be something as simple as _/orders_, and similarly the URI for retrieving all customers could be _/customers_. Issuing an HTTP GET request to the _/orders_ URI should return a list representing all orders in the collection encoded as an HTTP response:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/orders HTTP/1.1
 ...
 ```
 
 The response shown below encodes the orders as an XML list structure. The list contains 7 orders:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Date: Fri, 22 Aug 2014 08:49:02 GMT
 Content-Length: ...
-<OrderList xmlns:i="..." xmlns="..."><Order><OrderID>1</OrderID><OrderValue>99.90</OrderValue><ProductID>1</ProductID><Quantity>1</Quantity></Order><Order><OrderID>2</OrderID><OrderValue>10.00</OrderValue><ProductID>4</ProductID><Quantity>2</Quantity></Order><Order><OrderID>3</OrderID><OrderValue>16.60</OrderValue><ProductID>2</ProductID><Quantity>4</Quantity></Order><Order><OrderID>4</OrderID><OrderValue>25.90</OrderValue><ProductID>3</ProductID><Quantity>1</Quantity></Order><Order><OrderID>7</OrderID><OrderValue>99.90</OrderValue><ProductID>1</ProductID><Quantity>1</Quantity></Order></OrderList>```
-
+<OrderList xmlns:i="..." xmlns="..."><Order><OrderID>1</OrderID><OrderValue>99.90</OrderValue><ProductID>1</ProductID><Quantity>1</Quantity></Order><Order><OrderID>2</OrderID><OrderValue>10.00</OrderValue><ProductID>4</ProductID><Quantity>2</Quantity></Order><Order><OrderID>3</OrderID><OrderValue>16.60</OrderValue><ProductID>2</ProductID><Quantity>4</Quantity></Order><Order><OrderID>4</OrderID><OrderValue>25.90</OrderValue><ProductID>3</ProductID><Quantity>1</Quantity></Order><Order><OrderID>7</OrderID><OrderValue>99.90</OrderValue><ProductID>1</ProductID><Quantity>1</Quantity></Order></OrderList>
+```
 To fetch an individual order requires specifying the identifier for the order from the _orders_ resource, such as _/orders/2_:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/orders/2 HTTP/1.1
-...```
+...
+```
 
-
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Date: Fri, 22 Aug 2014 08:49:02 GMT
 Content-Length: ...
 <Order xmlns:i="..." xmlns="...">
-<OrderID>2</OrderID><OrderValue>10.00</OrderValue><ProductID>4</ProductID><Quantity>2</Quantity></Order>```
+<OrderID>2</OrderID><OrderValue>10.00</OrderValue><ProductID>4</ProductID><Quantity>2</Quantity></Order>
+```
 
 > **Note**: For simplicity, these examples show the information in responses being returned as XML text data. However, there is no reason why resources should not contain any other type of data supported by HTTP, such as binary or encrypted information; the content-type in the HTTP response should specify the type. Also, a REST model may be able to return the same data in different formats, such as XML or JSON. In this case, the web service should be able to perform content negotiation with the client making the request. The request can include an _Accept_ header which specifies the preferred format that the client would like to receive and the web service should attempt to honor this format if at all possible.
 
@@ -112,34 +117,40 @@ The data included by a client application in many HTTP requests, and the corresp
 
 When a client application sends a request that returns data in the body of a message, it can specify the formats it can handle in the Accept header of the request. The following code illustrates an HTTP GET request that retrieves the details of customer 1 and expects the result to be returned as JSON:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/orders/2 HTTP/1.1
 ...
 Accept: application/json
-...```
+...
+```
 
 If the web server supports this format, it can reply with a response that includes Content-Type header that specifies the format of the data in the body of the message:
 
 > **Note**: For maximum interoperability, the formats referenced in the Accept and Content-Type headers should be recognized MIME types rather than some custom format.
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Date: Fri, 22 Aug 2014 09:18:37 GMT
 Content-Length: ...
-{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}```
+{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}
+```
 
 If the web server does not support the requested format, it can send the data in a different format, but must specify the format (such as _text/xml_) in the CONTENT-TYPE header. It is the responsibility of the client application to parse the response message and interpret the results in the message body appropriately.
 
 Note that in this example, the web server successfully retrieves the requested data and indicates success by passing back a status code of 200 in the response header. If no matching data is found, it should instead return a status code of 404 (not found) and the body of the response message can contain additional information. The format of this information is specified by the Content-Type header, as shown in the following example:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/orders/222 HTTP/1.1
 ...
 Accept: application/json
-...```
+...
+```
 
 Order 222 does not exist, so the response message looks like this:
 
@@ -156,23 +167,27 @@ Content-Length: ...
 
 When an application sends an HTTP PUT request to update a resource, it specifies the URI of the resource and provides the data to be modified in the body of the request message. It should also specify the format of this data by using the Content-Type header. A common format used for text-based information is _application/x-www-form-urlencoded_, which comprises a set of name/value pairs separated by the & character. The next example shows an HTTP PUT request that modifies the information in order 1:
 
-```HTTP Request
+```
+HTTP Request
 PUT http://adventure-works.com/orders/1 HTTP/1.1
 ...
 Content-Type: application/x-www-form-urlencoded
 ...
 Date: Fri, 22 Aug 2014 09:18:37 GMT
 Content-Length: ...
-ProductID=3&Quantity=5&OrderValue=250```
+ProductID=3&Quantity=5&OrderValue=250
+```
 
 If the modification is successful, it should respond with an HTTP 204 status code, indicating that the process has been successfully handled, but that the response body contains no further information. The Location header in the response contains the URI of the newly updated resource:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 204 No Content
 ...
 Location: http://adventure-works.com/orders/1
 ...
-Date: Fri, 22 Aug 2014 09:18:37 GMT```
+Date: Fri, 22 Aug 2014 09:18:37 GMT
+```
 
 > **Tip**: If the data in an HTTP PUT request message includes date and time information, make sure that your web service accepts dates and times formatted following the ISO 8601 standard.
 
@@ -182,18 +197,21 @@ Again, if the resource to be updated does not exist, the web server should inste
 
 The format of an HTTP POST requests that create new resources are similar to those of PUT requests; the message body contains the details of the new resource to be added. However, the URI typically specifies the collection to which the resource should be added. The following example creates a new order and adds it to the orders collection:
 
-```HTTP Request
+```
+HTTP Request
 POST http://adventure-works.com/orders HTTP/1.1
 ...
 Content-Type: application/x-www-form-urlencoded
 ...
 Date: Fri, 22 Aug 2014 09:18:37 GMT
 Content-Length: ...
-ProductID=5&Quantity=15&OrderValue=400```
+ProductID=5&Quantity=15&OrderValue=400
+```
 
 If the request is successful, the web server should respond with a message code with HTTP status code 201 (Created). The Location header should contain the URI of the newly created resource, and the body of the response should contain a copy of the new resource; the Content-Type header specifies the format of this data:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 201 Created
 ...
 Content-Type: application/json; charset=utf-8
@@ -201,22 +219,27 @@ Location: http://adventure-works.com/orders/99
 ...
 Date: Fri, 22 Aug 2014 09:18:37 GMT
 Content-Length: ...
-{"OrderID":99,"ProductID":5,"Quantity":15,"OrderValue":400}```
+{"OrderID":99,"ProductID":5,"Quantity":15,"OrderValue":400}
+```
 
 > **Tip**: If the data provided by a PUT or POST request is invalid, the web server should respond with a message with HTTP status code 400 (Bad Request). The body of this message can contain additional information about the problem with the request and the formats expected, or it can contain a link to a URL that provides more details.
 
 To remove a resource, an HTTP DELETE request simply provides the URI of the resource to be deleted. The following example attempts to remove order 99:
 
-```HTTP Request
+```
+HTTP Request
 DELETE http://adventure-works.com/orders/99 HTTP/1.1
-...```
+...
+```
 
 If the delete operation is successful, the web server should respond with HTTP status code 204, indicating that the process has been successfully handled, but that the response body contains no further information (this is the same response returned by a successful PUT operation, but without a Location header as the resource no longer exists.
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 204 No Content
 ...
-Date: Fri, 22 Aug 2014 09:18:37 GMT```
+Date: Fri, 22 Aug 2014 09:18:37 GMT
+```
 
 If the resource is not found, the web server should return a 404 (Not Found) message instead.
 
@@ -255,30 +278,37 @@ You can extend this approach to limit (project) the fields returned if a single 
 ## Handling large binary resources
 A single resource may contain large binary fields, such as files or images. To overcome the transmission problems caused by unreliable and intermittent connections and to improve response times, consider providing operations that enable such resources to be retrieved in chunks by the client application. To do this, the web API should support the Accept-Ranges header for GET requests for large resources, and ideally implement HTTP HEAD requests for these resources. The Accept-Ranges header indicates that the GET operation supports partial results, and that a client application can submit GET requests that return a subset of a resource specified as a range of bytes. A HEAD request is similar to a GET request except that it only returns a header that describes the resource and an empty message body. A client application can issue a HEAD request to determine whether to fetch a resource by using partial GET requests. The following example shows a HEAD request that obtains information about a product image:
 
-```HTTP Request
+```
+HTTP Request
 HEAD http://adventure-works.com/products/10?fields=ProductImage HTTP/1.1
-...```
+...
+```
 
 The response message contains a header that includes the size of the resource (4580 bytes), and the Accept-Ranges header that the corresponding GET operation supports partial results:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Accept-Ranges: bytes
 Content-Type: image/jpeg
 Content-Length: 4580
-...```
+...
+```
 
 The client application can use this information to construct a series of GET operations to retrieve the image in smaller chunks. The first request fetches the first 2500 bytes by using the Range header:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/products/10?fields=ProductImage HTTP/1.1
 Range: bytes=0-2499
-...```
+...
+```
 
 The response message indicates that this is a partial response by returning HTTP status code 206. The Content-Length header specifies the actual number of bytes returned in the message body (not the size of the resource), and the Content-Range header indicates which part of the resource this is (bytes 0-2499 out of 4580):
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 206 Partial Content
 ...
 Accept-Ranges: bytes
@@ -286,25 +316,30 @@ Content-Type: image/jpeg
 Content-Length: 2500
 Content-Range: bytes 0-2499/4580
 ...
-_{binary data not shown}_```
+_{binary data not shown}_
+```
 
 A subsequent request from the client application can retrieve the remainder of the resource by using an appropriate Range header:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/products/10?fields=ProductImage HTTP/1.1
 Range: bytes=2500-
-...```
+...
+```
 
 The corresponding result message should look like this:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 206 Partial Content
 ...
 Accept-Ranges: bytes
 Content-Type: image/jpeg
 Content-Length: 2080
 Content-Range: bytes 2500-4580/4580
-...```
+...
+```
 
 ## Using the HATEOAS approach to enable navigation to related resources
 
@@ -314,32 +349,38 @@ One of the primary motivations behind REST is that it should be possible to navi
 
 As an example, to handle the relationship between customers and orders, the data returned in the response for a specific order should contain URIs in the form of a hyperlink identifying the customer that placed the order, and the operations that can be performed on that customer.
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/orders/3 HTTP/1.1
 Accept: application/json
-...```
+...
+```
 
 The body of the response message contains a _Links_ array (highlighted in the code example) that specifies the nature of the relationship (_Customer_), the URI of the customer (_http://adventure-works.com/customers/3_), how to retrieve the details of this customer (_GET_), and the MIME types that the web server supports for retrieving this information (_text/xml_ and _application/json_). This is all the information that a client application needs to be able to fetch the details of the customer. Additionally, the Links array also includes links for the other operations that can be performed, such as PUT (to modify the customer, together with the format that the web server expects the client to provide), and DELETE.
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Content-Length: ...
 {"OrderID":3,"ProductID":2,"Quantity":4,"OrderValue":16.60,"Links":[(some links omitted){"Relationship":"customer","HRef":" http://adventure-works.com/customers/3", "Action":"GET","LinkedResourceMIMETypes":["text/xml","application/json"]},{"Relationship":"
-customer","HRef":" http://adventure-works.com /customers/3", "Action":"PUT","LinkedResourceMIMETypes":["application/x-www-form-urlencoded"]},{"Relationship":"customer","HRef":" http://adventure-works.com /customers/3","Action":"DELETE","LinkedResourceMIMETypes":[]}]}```
+customer","HRef":" http://adventure-works.com /customers/3", "Action":"PUT","LinkedResourceMIMETypes":["application/x-www-form-urlencoded"]},{"Relationship":"customer","HRef":" http://adventure-works.com /customers/3","Action":"DELETE","LinkedResourceMIMETypes":[]}]}
+```
 
 For completeness, the Links array should also include self-referencing information pertaining to the resource that has been retrieved. These links have been omitted from the previous example, but are highlighted in the following code. Notice that in these links, the relationship _self_ has been used to indicate that this is a reference to the resource being returned by the operation:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Content-Length: ...
 {"OrderID":3,"ProductID":2,"Quantity":4,"OrderValue":16.60,"Links":[{"Relationship":"self","HRef":" http://adventure-works.com/orders/3", "Action":"GET","LinkedResourceMIMETypes":["text/xml","application/json"]},{"Relationship":" self","HRef":" http://adventure-works.com /orders/3", "Action":"PUT","LinkedResourceMIMETypes":["application/x-www-form-urlencoded"]},{"Relationship":"self","HRef":" http://adventure-works.com /orders/3", "Action":"DELETE","LinkedResourceMIMETypes":[]},{"Relationship":"customer",
-"HRef":" http://adventure-works.com /customers/3", "Action":"GET","LinkedResourceMIMETypes":["text/xml","application/json"]},{"Relationship":" customer" (customer links omitted)}]}```
+"HRef":" http://adventure-works.com /customers/3", "Action":"GET","LinkedResourceMIMETypes":["text/xml","application/json"]},{"Relationship":" customer" (customer links omitted)}]}
+```
 
 For this approach to be effective, client applications must be prepared to retrieve and parse this additional information. 
 
@@ -353,25 +394,29 @@ This is the simplest approach, and may be acceptable for some internal APIs. Big
 
 For example, a request to the URI _http://adventure-works.com/customers/3_ should return the details of a single customer containing _Id_, _Name_, and _Address_ fields expected by the client application:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Content-Length: ...
-[{"Id":3,"Name":"Contoso LLC","Address":"1 Microsoft Way Redmond WA 98053"}]```
+[{"Id":3,"Name":"Contoso LLC","Address":"1 Microsoft Way Redmond WA 98053"}]
+```
 
 > **Note**: For the purposes of simplicity and clarity, the example responses shown in this section do not include HATEOAS links.
 
 If the _DateCreated_ field is added to the schema of the customer resource, then the response would look like this:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Content-Length: ...
-[{"Id":3,"Name":"Contoso LLC","DateCreated":"2014-09-04T12:11:38.0376089Z","Address":"1 Microsoft Way Redmond WA 98053"}]```
+[{"Id":3,"Name":"Contoso LLC","DateCreated":"2014-09-04T12:11:38.0376089Z","Address":"1 Microsoft Way Redmond WA 98053"}]
+```
 
 Existing client applications might continue functioning correctly if they are capable of ignoring unrecognized fields, while new client applications can be designed to handle this new field. However, if more radical changes to the schema of resources occur (such as removing or renaming fields) or the relationships between resources change then these may constitute breaking changes that prevent existing client applications from functioning correctly. In these situations you should consider one of the following approaches.
 
@@ -380,13 +425,15 @@ Each time you modify the web API or change the schema of resources, you add a ve
 
 Extending the previous example, if the _Address_ field is restructured into sub-fields containing each constituent part of the address (such as _StreetAddress_, _City_, _State_, and _ZipCode_), this version of the resource could be exposed through a URI containing a version number, such as http://adventure-works.com/v2/customers/3:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Content-Length: ...
-[{"Id":3,"Name":"Contoso LLC","DateCreated":"2014-09-04T12:11:38.0376089Z","Address":{"StreetAddress":"1 Microsoft Way","City":"Redmond","State":"WA","ZipCode":98053}}]```
+[{"Id":3,"Name":"Contoso LLC","DateCreated":"2014-09-04T12:11:38.0376089Z","Address":{"StreetAddress":"1 Microsoft Way","City":"Redmond","State":"WA","ZipCode":98053}}]
+```
 
 This versioning mechanism is very simple but depends on the server routing the request to the appropriate endpoint. However, it can become unwieldy as the web API matures through several iterations and the server has to support a number of different versions. Also, from a purist’s point of view, in all cases the client applications are fetching the same data (customer 3), so the URI should not really be different depending on the version. This scheme also complicates implementation of HATEOAS as all links will need to include the version number in their URIs.
 
@@ -402,56 +449,68 @@ Rather than appending the version number as a query string parameter, you could 
 
 Version 1:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/customers/3 HTTP/1.1
 ... 
 Custom-Header: api-version=1
-...```
+...
+```
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Content-Length: ...
-[{"Id":3,"Name":"Contoso LLC","Address":"1 Microsoft Way Redmond WA 98053"}]```
+[{"Id":3,"Name":"Contoso LLC","Address":"1 Microsoft Way Redmond WA 98053"}]
+```
 
 Version 2:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/customers/3 HTTP/1.1
 ... 
 Custom-Header: api-version=2
-...```
+...
+```
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
 ...
 Content-Length: ...
-[{"Id":3,"Name":"Contoso LLC","DateCreated":"2014-09-04T12:11:38.0376089Z","Address":{"StreetAddress":"1 Microsoft Way","City":"Redmond","State":"WA","ZipCode":98053}}]```
+[{"Id":3,"Name":"Contoso LLC","DateCreated":"2014-09-04T12:11:38.0376089Z","Address":{"StreetAddress":"1 Microsoft Way","City":"Redmond","State":"WA","ZipCode":98053}}]
+```
 
 Note that as with the previous two approaches, implementing HATEOAS requires including the appropriate custom header in any links.
 
 ## Media type versioning
 When a client application sends an HTTP GET request to a web server it should stipulate the format of the content that it can handle by using an Accept header, as described earlier in this guidance. Frequently the purpose of the Accept header is to allow the client application to specify whether the body of the response should be XML, JSON, or some other common format that the client can parse. However, it is possible to define custom media types that include information enabling the client application to indicate which version of a resource it is expecting. The following example shows a request that specifies an Accept header with the value _application/vnd.adventure-works.v1+json_. The _vnd.adventure-works.v1_ element indicates to the web server that it should return version 1 of the resource, while the _json_ element specifies that the format of the response body should be JSON:
 
-```HTTP Request
+```
+HTTP Request
 GET http://adventure-works.com/customers/3 HTTP/1.1
 ... 
 Accept: application/vnd.adventure-works.v1+json
-...```
+...
+```
 
 The code handling the request is responsible for processing the Accept header and honoring it as far as possible (the client application may specify multiple formats in the Accept header, in which case the web server can choose the most appropriate format for the response body). The web server confirms the format of the data in the response body by using the Content-Type header:
 
-```HTTP Response
+```
+HTTP Response
 HTTP/1.1 200 OK
 ...
 Content-Type: application/vnd.adventure-works.v1+json; charset=utf-8
 ...
 Content-Length: ...
-[{"Id":3,"Name":"Contoso LLC","Address":"1 Microsoft Way Redmond WA 98053"}]```
+[{"Id":3,"Name":"Contoso LLC","Address":"1 Microsoft Way Redmond WA 98053"}]
+```
 
 If the Accept header does not specify any known media types, the web server should generate an HTTP 404 (Not Found) response message.
 
