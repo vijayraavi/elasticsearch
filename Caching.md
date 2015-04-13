@@ -60,6 +60,7 @@ view of cached data by locating the cache in a separate location,
 typically hosted as part of a separate service, as shown in Figure 2.
 
 ![Using a shared cache_](figures/Caching/Figure2.png)
+
 _Figure 2: Using a shared cache_
 
 An important benefit of using the shared caching approach is the 
