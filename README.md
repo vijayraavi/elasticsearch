@@ -55,4 +55,4 @@ This is a *living* project. We will be adding more documentation to cover additi
 [RetryServiceSpecificGuidance]: Retry-Service-Specific.md
 [RetryPolicies]: Retry-Policies.md
 [ScalabilityChecklist]: Scalability-checklist.md
-[AvailabilityChecklist]: Availability-checklist.md
+[AvailabilityChecklist]: availability-checklist.md
