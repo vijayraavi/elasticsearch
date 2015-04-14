@@ -1,4 +1,4 @@
-﻿# Autoscaling guidance
+# Autoscaling guidance
 
 # Overview
 Autoscaling is the process of dynamically allocating the resources required by an application to match performance requirements and satisfy service level agreements (SLAs) while minimizing runtime costs. As the volume of work grows, an application may require additional resources to enable it to perform its tasks in a timely manner. As demand slackens, resources can be de-allocated to minimize costs while still maintaining adequate performance and meeting SLAs. 
@@ -90,6 +90,7 @@ For more information, see:
 - [Add Autoscale Settings](http://msdn.microsoft.com/en-us/library/azure/dn510372.aspx)
 - [Auto Scaling Cloud Services on CPU Percentage with the Windows Azure Monitoring Services Management Library](http://rickrainey.com/2013/12/15/auto-scaling-cloud-services-on-cpu-percentage-with-the-windows-azure-monitoring-services-management-library/)
 - [How to use Windows Azure Monitoring Services Management Library to create an Autoscale Rule](http://blogs.msdn.com/b/cie/archive/2014/02/20/how-to-use-windows-azure-monitoring-services-management-library-to-create-an-autoscale-rule.aspx)
+
 # Related patterns and guidance
 The following patterns and guidance may also be relevant to your scenario when implementing autoscaling:
 

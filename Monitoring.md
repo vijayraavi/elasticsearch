@@ -177,7 +177,7 @@ SLAs are frequently defined in terms of:
 - Operational response time. The system may also make guarantees concerning the rate at which requests are processed, such as 99% of all business transactions will complete within 2 seconds, and no single transaction will take longer than 10 seconds.
 
 > **Note**: Some contracts for commercial systems might also include SLAs concerning customer support, such as all help desk requests will elicit a response within 5 minutes, and that 99% of all problems should be fully addressed within 1 working day. Effective [issue tracking](#insertlink#) (described later in this section) is key to meeting SLAs such as these.
-> 
+
 ### Requirements for SLA monitoring
 At the highest level, an operator should be able to determine at a glance whether the system is meeting the agreed SLAs or not, and if not then to drill down and examine the underlying factors to determine the reasons for substandard performance.
 
@@ -369,7 +369,7 @@ You can easily monitor individual system-level performance counters, capture met
 All monitoring data should be time-stamped in the same way. For consistency, record all dates and times by using Coordinated Universal Time. This will help to enable you to more easily trace sequences of events.
 
 > **Note**: Computers operating in different timezones and networks might not be synchronized, so you should not depend on using timestamps alone for correlating instrumentation data that spans multiple machines.
-> 
+
 ### What information should the instrumentation data include?
 Consider the following points when deciding which instrumentation data you need to collect:
 

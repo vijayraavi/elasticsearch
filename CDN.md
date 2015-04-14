@@ -1,4 +1,4 @@
-﻿# Content Delivery Network (CDN) guidance
+# Content Delivery Network (CDN) guidance
 
 # Overview #
 The Microsoft Azure Content Delivery Network (CDN) offers developers a global solution for delivering high-bandwidth content that is hosted in Azure. The CDN caches publicly available objects loaded from Azure blob storage or an application folder at strategically placed locations to provide maximum bandwidth for delivering content to users. It is typically used for delivering static content such as images, style sheets, documents, files, client-side scripts, and HTML pages.  
@@ -42,7 +42,7 @@ Scenarios where CDN may be less useful include:
 + When the data is private, such as for large enterprises or supply chain ecosystems.
 
 
-# General guidelines & good practices #
+# General guidelines and good practices #
 Using the CDN is a good way to minimize the load on your application, and maximize availability and performance. You should consider this for all of the appropriate content and resources you application uses. Consider the following points when designing your strategy to use the CDN:  
 + **Origin **+ Deploying content through the CDN simply requires you to specify an HTTP (port 80) endpoint that the CDN service will use to access and cache the content. + The endpoint can specify an Azure blob storage container that holds the static content you want to deliver through the CDN. The container must be marked as public. Only blobs in a public container that have public read access will be available through the CDN.
 + The endpoint can specify a folder named **cdn** in the root of one of application’s compute layers (such as a web role or a virtual machine). The results from requests for resources, including dynamic resources such as ASPX pages, will be cached on the CDN. The minimum cacheability period is 300 seconds. Any shorter period will prevent the content from being deployed to the CDN (see the section “<a href="#cachecontrol" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">Cache control</a>” for more information).
@@ -103,35 +103,35 @@ This section contains some examples of code and techniques for working with the 
 ## URL rewriting ##
 The following except from a Web.config file in the root of a Cloud Services hosted application demonstrates how to perform URL rewriting when using the CDN. Requests from the CDN for content it will cache are redirected to specific folders within the application root based on the type of the resource (such as scripts and images).  
 
-```other
+```XML
 <system.webServer>
-    …
-    <rewrite>
-      <rules>
-        <rule name="VersionedResource" stopProcessing="false">
-          <match url="(.*)_v(.*)\.(.*)" ignoreCase="true" />
-          <action type="Rewrite" url="{R:1}.{R:3}" appendQueryString="true" />
-        </rule>
-        <rule name="CdnImages" stopProcessing="true">
-          <match url="cdn/Images/(.*)" ignoreCase="true" />
-          <action type="Rewrite" url="/Images/{R:1}" appendQueryString="true" />
-        </rule>
-        <rule name="CdnContent" stopProcessing="true">
-          <match url="cdn/Content/(.*)" ignoreCase="true" />
-          <action type="Rewrite" url="/Content/{R:1}" appendQueryString="true" />
-        </rule>
-        <rule name="CdnScript" stopProcessing="true">
-          <match url="cdn/Scripts/(.*)" ignoreCase="true" />
-          <action type="Rewrite" url="/Scripts/{R:1}" appendQueryString="true" />
-        </rule>
-        <rule name="CdnScriptBundles" stopProcessing="true">
-          <match url="cdn/bundles/(.*)" ignoreCase="true" />
-          <action type="Rewrite" url="/bundles/{R:1}" appendQueryString="true" />
-        </rule>
-      </rules>
-    </rewrite>
-    …
-  </system.webServer>
+  ...
+  <rewrite>
+    <rules>
+      <rule name="VersionedResource" stopProcessing="false">
+        <match url="(.*)_v(.*)\.(.*)" ignoreCase="true" />
+        <action type="Rewrite" url="{R:1}.{R:3}" appendQueryString="true" />
+      </rule>
+      <rule name="CdnImages" stopProcessing="true">
+        <match url="cdn/Images/(.*)" ignoreCase="true" />
+        <action type="Rewrite" url="/Images/{R:1}" appendQueryString="true" />
+      </rule>
+      <rule name="CdnContent" stopProcessing="true">
+        <match url="cdn/Content/(.*)" ignoreCase="true" />
+        <action type="Rewrite" url="/Content/{R:1}" appendQueryString="true" />
+      </rule>
+      <rule name="CdnScript" stopProcessing="true">
+        <match url="cdn/Scripts/(.*)" ignoreCase="true" />
+        <action type="Rewrite" url="/Scripts/{R:1}" appendQueryString="true" />
+      </rule>
+      <rule name="CdnScriptBundles" stopProcessing="true">
+        <match url="cdn/bundles/(.*)" ignoreCase="true" />
+        <action type="Rewrite" url="/bundles/{R:1}" appendQueryString="true" />
+      </rule>
+    </rules>
+  </rewrite>
+  ...
+</system.webServer>
 ```
 
 The addition of the rewrite rules performs the following redirections:  

@@ -1,4 +1,4 @@
-﻿#Background jobs guidance
+#Background jobs guidance
 
 # Overview
 Many types of applications require background tasks that run independently of the user interface (UI). Examples include batch jobs, intensive processing tasks, and long running processes such as workflows. Background jobs can be executed without requiring user interaction; the application can start the job and then continue to process interactive requests from users. This can help to minimize the load on the application UI, which can improve availability and reduce interactive response times. 
@@ -44,6 +44,7 @@ If you use a schedule driven task that must run as a single instance, be aware o
 
 - If the compute instance that is running the scheduler (such as a Virtual Machine using Windows Scheduled Tasks) is scaled, you will have multiple instances of the scheduler running and these could start multiple instances of the task.
 - If tasks run for longer than the period between scheduler events, the scheduler may start another instance of the task while the previous one is still running.
+
 # Returning results
 Background jobs execute asynchronously in a separate process, or even a separate location, from the UI or the process that invoked the background task. Ideally, background tasks are “fire and forget” operations, and their execution progress has no impact on the UI or the calling process. This means that the calling process does not wait for completion of the tasks, and therefore cannot automatically detect when the task ends.
 If you require a background task to communicate with the calling task to indicate progress or completion, you must implement a mechanism for this. Some examples are:
@@ -208,16 +209,18 @@ Consider the following points when planning how you will run background tasks in
 - The Azure load balancer starts directing traffic to the role instance when the **RoleEntryPoint.OnStart** method returns true. Therefore, consider putting all your initialization code in the **OnStart** method so that role instances that do not successfully initialize will not receive any traffic. 
 - You can use startup tasks in addition to the methods of the **RoleEntryPoint** class. You should use startup tasks to initialize any settings you need to change in the Azure load balancer because these tasks will execute before the role receives any requests. For more information, see [Run Startup Tasks in Azure](http://msdn.microsoft.com/en-us/library/azure/hh180155.aspx).
 - If there is an error in a startup task, it may force the role to continually restart. This can prevent you from performing a VIP swap back to a previously staged version because the swap requires exclusive access to the role, and this cannot be obtained while the role is restarting. To resolve this:
-  - Add the following code to the beginning of the **OnStart** and **Run** methods in your role:
+	-  Add the following code to the beginning of the **OnStart** and **Run** methods in your role:
 
-			var freeze = CloudConfigurationManager.GetSetting("Freeze");
-			if (freeze != null)
-			{
-			  if (Boolean.Parse(freeze))
-			  {
-			    Thread.Sleep(System.Threading.Timeout.Infinite);
-			  }
-			}
+	```C#
+	var freeze = CloudConfigurationManager.GetSetting("Freeze");
+	if (freeze != null)
+	{
+		if (Boolean.Parse(freeze))
+	  	{
+		    Thread.Sleep(System.Threading.Timeout.Infinite);
+		}
+	}
+	```
 
    - Add the definition of the **Freeze** setting as a Boolean value to the ServiceDefinition.csdef and ServiceConfiguration.*.cscfg files for the role and set it to **false**. If the role goes into a repeated restart mode, you can change the setting to **true** to freeze role execution and allow it to be swapped with a previous version.
 
