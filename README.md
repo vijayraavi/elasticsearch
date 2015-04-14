@@ -1,46 +1,58 @@
-# Optimizing Performance for Cloud Applications
-## *- what not to do if you want your systems to be fast and scalable*
+# Azure Cloud Application Design and Implementation Guidance
 
 [![Join the chat at https://gitter.im/mspnp/performance-optimization](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mspnp/performance-optimization?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Building applications that you can deploy to the cloud by using Azure is relatively simple. Building applications that scale well and run fast under a heavy load in the cloud is more difficult. A common scenario is that an application appears to perform well during performance testing and displays no problems. But once it is released to the cloud, accessed by a large number of concurrent users, and subjected to a much bigger, more random workload it frequently exhibits undesirable behavior (such as rejecting user requests, stalling, or throwing exceptions). The development team is then faced with two questions:
+Designing and implementing applications for the cloud brings a unique set of challenges due to the remoteness of the infrastructure and the very nature of distributed services. Azure provides a comprehensive platform and infrastructure for hosting large-scale web applications and cloud services. However, to be successful, you need to understand how to use the features that Azure provides to support your systems correctly. The purpose of this site is to provide architectural guidance to enable you to build and deploy world-class systems using Azure.
 
-1. Why did this behavior not show up during testing? and
-2. How do we fix it?
+These documents focus on the essential aspects of architecting systems to make optimal use of Azure, and summarize best practice for building cloud solutions. The current set of guidance documents contains the following items:
 
-The answer to the first question is straightforward. It is very difficult to simulate the actions of real-world users, their patterns of behavior, or the volumes of work they might perform in an artificial test environment. The only comprehensive way to understand how the system behaves under load is to instrument and monitor it while it is in production. This doesn't mean that you shouldn't perform any kind of performance testing. Rather, you should accept that performance testing is unlikely to provide a complete indicator of system behavior and be prepared to observe and correct performance issues when they arise in the live system.
+- **[API Design][APIDesign]** describes the issues that you should consider when designing a web API..
 
-The answer to the second question is less straightforward. To fix the problem requires understanding what the problem actually is. This can be difficult as it might only manifest itself under a particular set of circumstances. Again, instrumentation and logging are vitally important to determining these circumstances. However, having an insight into some of the most common misconceptions about cloud applications and the resultant impact that they can have on performance is also useful. That is the purpose of the cloud performance anti-patterns presented here. 
+- **[API Implementation][APIImplementation]** focusses on best practices for implementing a web API and publishing it to make it available to client applications.
 
-A performance anti-pattern illustrates an example of common practice that is likely to cause scalability problems once an application is placed under pressure. These practices might be followed without question in applications designed to run on-premises where expensive hardware and fast networks are prevalent. But the cloud is a different environment and applications have to be designed to cope with slower, more unpredictable networks and run on commodity hardware. In the cloud, scale-out is a more viable solution than scale-up, but if an application is not designed with scale-up in mind it can quickly reach the limits of its performance.
+- **[Autoscaling Guidance][AutoscalingGuidance]** summarizes considerations for taking advantage of the elasticity of cloud-hosted environments while easing management overhead by reducing the need for an operator to continually monitor the performance of a system and make decisions about adding or removing resources.
 
-These anti-patterns represent some of the most frequent causes of issues that we have experienced in cloud-based systems, both during our own internal developments and in customer engagements. We have documented the reasons why they typically occur, their symptoms, and possible techniques that you can use to resolve them. We have included sample code depicting the original problem and a suggested solution. Part of this documentation includes a generalized detection strategy based on the sample code; you should be able to adapt the general guidance provided to your own circumstances. We have also described the impact of the solution and any knock-on consequences that it might have elsewhere in the system.
+- **[Background Jobs Guidance][BackgroundJobsGuidance]** describes the options available, and best practices for implementing tasks that should be performed in the background, independently from any foreground or interactive operations.
 
-The current catalog of cloud performance anti-patterns contains the following items:
+- **[Content Delivery Network (CDN) Guidance][CDNGuidance]** provides general guidance and good practice for using the CDN to minimize the load on your applications, and maximize availability and performance.
 
-- **[Busy Database][BusyDatabase]** describes what might happen if you offload too much processing to an intelligent data store.
+- **[Caching Guidance][CachingGuidance]** summarizes how to use caching with Azure applications and services to improve the performance and scalability of a system.
 
-- **[Busy Front End][BusyFrontEnd]** describes the situation where all of the work is performed in a single tier of a cloud application.
+- **[Data Partitioning Guidance][DataPartitioningGuidance]** describes strategies that you can use to partition data to improve scalability, reduce contention, and optimize performance.
 
-- **[Chatty I/O][ChattyIO]** illustrates the effects of implementing a system that makes many small network requests.
+- **[Monitoring and Diagnostics Guidance][MonitoringandDiagnosticsGuidance]** provides guidance on how to track the way in which users utilize your system, trace resource utilization, and generally monitor the health and performance of your system.
 
-- **[Extraneous Fetching][ExtraneousFetching]** highlights what can happen if an application retrieves data that it may or may not need in a speculative manner.
+- **[Retry General Guidance][RetryGeneralGuidance]** covers general guidance for transient fault handling in an Azure application.
 
-- **[Improper Instantiation][ImproperInstantiation]** describes the effects of repeatedly creating and destroying objects that are designed to be shared and reused.
+- **[Retry Service Specific Guidance][RetryServiceSpecificGuidance]** summarizes the retry mechanism features for the majority of Azure services, and includes information to help you use, adapt, or extend the retry mechanism for that service.
 
-- **[Monolithic Persistence][MonolithicPersistence]** illustrates the impact on database performance if the same data store is used as the repository for data that follows distinctly different usage patterns such as logging, session state, and business information.
+- **[Retry Policies][RetryPolicies]** provides details on how to configure different retry policies.
 
-- **[No Caching][NoCaching]** summarizes the effects of failing to cache information adequately (or at all).
+- **[Scalability Checklist][ScalabilityChecklist]** summarizes best practices for designing and implementing scalable services and handling data management.
 
-- **[Synchronous I/O][SynchronousIO]** describes how performing I/O operations synchronously can consume resources and seriously impact scalability. 
+- **[Availability Checklist][AvailabilityChecklist]** lists best practices for ensuring availability in an Azure application.
 
-Note that this project is still very much a work-in-progress. We will likely be adding further anti-patterns, and we welcome feedback, suggestions, and other contributions to those that we have already documented.
+This is a *living* project. We will be adding more documentation to cover additional aspects of Azure architecture. We also welcome feedback, suggestions, and other contributions to those items that we have already documented.
 
-[BusyDatabase]: BusyDatabase/docs/BusyDatabase.md
-[BusyFrontEnd]: BusyFrontEnd/docs/BusyFrontEnd.md
-[ChattyIO]: ChattyIO/docs/ChattyIO.md
-[ExtraneousFetching]: ExtraneousFetching/docs/ExtraneousFetching.md
-[ImproperInstantiation]: ImproperInstantiation/docs/ImproperInstantiation.md
-[MonolithicPersistence]: MonolithicPersistence/docs/MonolithicPersistence.md
-[NoCaching]: NoCaching/docs/NoCaching.md
-[SynchronousIO]: SynchronousIO/docs/SynchronousIO.md
+----------
+
+**Note**. This documentation is oriented towards architects. You can find detailed code examples and implementation documentation on the [Azure website][AzureWebSite]. Additionally, the [Performance Optimization][PerformanceOptimization] site contains further guidance on how to design systems that are scalable and efficient under load. 
+
+----------
+
+[AzureWebSite]: http://azure.microsoft.com/
+[PerformanceOptimization]: https://github.com/mspnp/performance-optimization
+
+[APIDesign]: API-Design.md
+[APIImplementation]: API-Implementation.md
+[AutoscalingGuidance]: Auto-scaling.md
+[BackgroundJobsGuidance]: Background-Jobs.md
+[CDNGuidance]: CDN.md
+[CachingGuidance]: Caching.md
+[DataPartitioningGuidance]: Data-partitioning.md
+[MonitoringandDiagnosticsGuidance]: Monitoring.md
+[RetryGeneralGuidance]: Retry-General.md
+[RetryServiceSpecificGuidance]: Retry-Service-Specific.md
+[RetryPolicies]: Retry-Policies.md
+[ScalabilityChecklist]: Scalability-checklist.md
+[AvailabilityChecklist]: Availability-checklist.md
