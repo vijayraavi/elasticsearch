@@ -15,12 +15,12 @@ In a service implemented by using the ASP.NET Web API, each request is routed to
 	By default, the Web API framework uses convention-based routing. The Web API framework creates an initial routing table that contains the following entry:
 
 	```C#
-config.Routes.MapHttpRoute(
-  name: "DefaultApi",
-  routeTemplate: "api/{controller}/{id}",
-  defaults: new { id = RouteParameter.Optional }
-);
-```
+	config.Routes.MapHttpRoute(
+  		name: "DefaultApi",
+	  	routeTemplate: "api/{controller}/{id}",
+	  	defaults: new { id = RouteParameter.Optional }
+	);
+	```
 
 	Routes can be generic, comprising literals such as _api_ and variables such as _{controller}_ and _{id}_. Convention-based routing allows some elements of the route to be optional. The Web API framework determines which method to invoke in the controller by matching the HTTP verb in the request to the initial part of the method name, and then by matching any optional parameters. For example, if a controller named orders contains the methods _GetAllOrders()_ or _GetOrderByInt(int id)_ then the GET request _http://www.adventure-works.com/api/orders/_ will be directed to the method _GetAlllOrders()_ and the GET request _http://www.adventure-works.com/api/orders/99_ will be routed to the method _GetOrderByInt(int id)_. If there is no matching method available that begins with the prefix Get in the controller, the Web API framework replies with an HTTP 405 (Method Not Allowed) message. Additionally, name of the parameter (id) specified in the routing table must be the same as the name of the parameter for the _GetOrderById_ method, otherwise the Web API framework will reply with an HTTP 404 (Not Found) response.
 
@@ -29,28 +29,28 @@ config.Routes.MapHttpRoute(
 	The default routing table will not match a request that references child resources in a RESTful web API, such as _http://www.adventure-works.com/api/customers/1/orders_ (find the details of all orders placed by customer 1). To handle these cases, you can add custom routes to the routing table:
 
 	```C#
-config.Routes.MapHttpRoute(
-  name: "CustomerOrdersRoute",
-  routeTemplate: "api/customers/{custId}/orders",
-  defaults: new { controller="Customers", action="GetOrdersForCustomer" })
-);
-```
+	config.Routes.MapHttpRoute(
+	    name: "CustomerOrdersRoute",
+	    routeTemplate: "api/customers/{custId}/orders",
+	    defaults: new { controller="Customers", action="GetOrdersForCustomer" })
+	);
+	```
 
 	This route directs requests that match the URI to the _GetOrdersForCustomer_ method in the _Customers_ controller. This method must take a single parameter named _custI_:
 
 	```C#
-public class CustomersController : ApiController
-{
-    ...
-    public IEnumerable<Order> GetOrdersForCustomer(int custId)
-    {
-        // Find orders for the specified customer
-        var orders = ...
-        return orders;
-    }
-    ...
-}
-```
+	public class CustomersController : ApiController
+	{
+	    ...
+	    public IEnumerable<Order> GetOrdersForCustomer(int custId)
+	    {
+	        // Find orders for the specified customer
+	        var orders = ...
+	        return orders;
+	    }
+	    ...
+	}
+	```
 
 	> **Tip**: Utilize the default routing wherever possible and avoid defining many complicated custom routes as this can result in brittleness (it is very easy to add methods to a controller that result in ambiguous routes) and reduced performance (the bigger the routing table, the more work the Web API framework has to do to work out which route matches a given URI). Keep the API and routes simple. For more information, see the section Organizing the Web API Around Resources in the API Design Guidance. If you must define custom routes, a preferable approach is to use attribute-based routing described later in this section.
 
@@ -65,49 +65,49 @@ public class CustomersController : ApiController
 	Attribute-based routing provides an alternative means for connecting routes to methods in a controller. Rather than relying on the pattern-matching features of convention-based routing, you can explicitly annotate methods in a controller with the details of the route to which they should be associated. This approach help to remove possible ambiguities. Furthermore, as explicit routes are defined at design time this approach is more efficient than convention-based routing at runtime. The following code shows how to apply the _Route_ attribute to methods in the Customers controller. These methods also use the HttpGet attribute to indicate that they should respond to _HTTP GET_ requests. This attribute enables you to name your methods using any convenient naming scheme rather than that expected by convention-based routing. You can also annotate methods with the _HttpPost_, _HttpPut_, and _HttpDelete_ attributes to define methods that respond to other types of HTTP requests.
 
 	```C#
-public class CustomersController : ApiController
-{
-    ...
-    [Route("api/customers/{id}")]
-    [HttpGet]
-    public Customer FindCustomerByID(int id)
-    {
-        // Find the matching customer
-        var customer = ...
-        return customer;
-    }
-    ...
-    [Route("api/customers/{id}/orders")]
-    [HttpGet]
-    public IEnumerable<Order> FindOrdersForCustomer(int id)
-    {
-        // Find orders for the specified customer
-        var orders = ...
-        return orders;
-    }
-    ...
-}
-```
+	public class CustomersController : ApiController
+	{
+	    ...
+	    [Route("api/customers/{id}")]
+	    [HttpGet]
+	    public Customer FindCustomerByID(int id)
+	    {
+	        // Find the matching customer
+	        var customer = ...
+	        return customer;
+	    }
+	    ...
+	    [Route("api/customers/{id}/orders")]
+	    [HttpGet]
+	    public IEnumerable<Order> FindOrdersForCustomer(int id)
+	    {
+	        // Find orders for the specified customer
+	        var orders = ...
+	        return orders;
+	    }
+	    ...
+	}
+	```
 
 	Attribute-based routing also has the useful side-effect of acting as documentation for developers needing to maintain the code in the future; it is immediately clear which method belongs to which route, and the _HttpGet_ attribute clarifies the type of HTTP request to which the method responds.
 
 	Attribute-based routing enables you to define constraints which restrict how the parameters are matched. Constraints can specify the type of the parameter, and in some cases they can also indicate the acceptable range of parameter values. In the following example, the id parameter to the _FindCustomerByID_ method must be a non-negative integer. If an application submits an HTTP GET request with a negative customer number, the Web API framework will respond with an HTTP 405 (Method Not Allowed) message:
 
 	```C#
-public class CustomersController : ApiController
-{
-    ...
-    [Route("api/customers/{id:int:min(0)}")]
-    [HttpGet]
-    public Customer FindCustomerByID(int id)
-    {
-        // Find the matching customer
-        var customer = ...
-        return customer;
-    }
-    ...
-}
-```
+	public class CustomersController : ApiController
+	{
+	    ...
+	    [Route("api/customers/{id:int:min(0)}")]
+	    [HttpGet]
+	    public Customer FindCustomerByID(int id)
+	    {
+	        // Find the matching customer
+	        var customer = ...
+	        return customer;
+	    }
+	    ...
+	}
+	```
 
 	For more information on attribute-based routing, see the page [Attribute Routing in Web API 2](http://www.asp.net/web-api/overview/web-api-routing-and-actions/attribute-routing-in-web-api-2) on the Microsoft website.
 
@@ -169,50 +169,50 @@ The code that implements these requests must not impose any side-effects. The sa
 	A web API must return messages that contain the correct HTTP status code to enable the client to determine how to handle the result, the appropriate HTTP headers so that the client understands the nature of the result, and a suitably formatted body to enable the client to parse the result. If you are using the ASP.NET Web API template, the default strategy for implementing methods that respond to HTTP POST requests is simply to return a copy of the newly created resource, as illustrated by the following example:
 
 	```C#
-public class CustomersController : ApiController
-{
-    ...
-    [Route("api/customers")]
-    [HttpPost]
-    public Customer CreateNewCustomer(Customer customerDetails)
-    {
-        // Add the new customer to the repository
-        // This method returns a customer with a unique ID allocated
-        // by the repository
-        var newCust = repository.Add(customerDetails);
-        // Return the newly added customer
-        return newCust;
-    }
-    ...
-}
-```
+	public class CustomersController : ApiController
+	{
+	    ...
+	    [Route("api/customers")]
+	    [HttpPost]
+	    public Customer CreateNewCustomer(Customer customerDetails)
+	    {
+	        // Add the new customer to the repository
+	        // This method returns a customer with a unique ID allocated
+	        // by the repository
+	        var newCust = repository.Add(customerDetails);
+	        // Return the newly added customer
+	        return newCust;
+	    }
+	    ...
+	}
+	```
 
 	If the POST operation is successful, the Web API framework creates an HTTP response with status code 200 (OK) and the details of the customer as the message body. However, according to the HTTP protocol, a POST operation should return status code 201 (Created) and the response message should include the URI of the newly created resource in the Location header of the response message.
 
 	To provide these features, return your own HTTP response message by using an _HttpResponseMessage_ object. This approach gives you fine control over the HTTP status code, the headers in the response message, and even the format of the data in the response message body, as shown in the following code example. This version of the _CreateNewCustomer_ method conforms more closely to the expectations of client following the HTTP protocol:
 
 	```C#
-public class CustomersController : ApiController
-{
-    ...
-    [Route("api/customers")]
-    [HttpPost]
-    public HttpResponseMessage CreateNewCustomer(Customer customerDetails)
-    {
-        // Add the new customer to the repository
-        var newCust = repository.Add(customerDetails);
-        // Construct the response
-        var response =
-            Request.CreateResponse(HttpStatusCode.Created, newCust);
-        // Add the Location header to the response
-        // The URI should be the location of the customer including its ID,
-        // such as http://adventure-works.com/api/customers/99
-        response.Headers.Location = new Uri(...);
-        return response;
-    }
-    ...
-}
-```
+	public class CustomersController : ApiController
+	{
+	    ...
+	    [Route("api/customers")]
+	    [HttpPost]
+	    public HttpResponseMessage CreateNewCustomer(Customer customerDetails)
+	    {
+	        // Add the new customer to the repository
+	        var newCust = repository.Add(customerDetails);
+	        // Construct the response
+	        var response =
+	            Request.CreateResponse(HttpStatusCode.Created, newCust);
+	        // Add the Location header to the response
+	        // The URI should be the location of the customer including its ID,
+	        // such as http://adventure-works.com/api/customers/99
+	        response.Headers.Location = new Uri(...);
+	        return response;
+	    }
+	    ...
+	}
+	```
 
 - **Support content negotiation**.
 
@@ -229,60 +229,60 @@ public class CustomersController : ApiController
 	Currently there are no standards that govern the implementation of HATEOAS, but the following example illustrates one possible approach. In this example, an HTTP GET request that finds the details for a customer returns a response that include HATEOAS links that reference the orders for that customer:
 
 	```HTTP
-GET http://adventure-works.com/customers/2 HTTP/1.1
-Accept: text/json
-...
-```
+	GET http://adventure-works.com/customers/2 HTTP/1.1
+	Accept: text/json
+	...
+	```
 
 	```HTTP
-HTTP/1.1 200 OK
-...
-Content-Type: application/json; charset=utf-8
-...
-Content-Length: ...
-{"CustomerID":2,"CustomerName":"Bert","Links":[
-  {"Relationship":"self",
-   "HRef":"http://adventure-works.com/customers/2",
-   "Action":"GET",
-   "LinkedResourceMIMETypes":["text/xml","application/json"]},
-  {"Relationship":"self",
-   "HRef":"http://adventure-works.com/customers/2",
-   "Action":"PUT",
-   "LinkedResourceMIMETypes":["application/x-www-form-urlencoded"]},
-  {"Relationship":"self",
-   "HRef":"http://adventure-works.com/customers/2",
-   "Action":"DELETE",
-   "LinkedResourceMIMETypes":[]},
-  {"Relationship":"orders",
-   "HRef":"http://adventure-works.com/customers/2/orders",
-   "Action":"GET",
-   "LinkedResourceMIMETypes":["text/xml","application/json"]},
-  {"Relationship":"orders",
-   "HRef":"http://adventure-works.com/customers/2/orders",
-   "Action":"POST",
-   "LinkedResourceMIMETypes":["application/x-www-form-urlencoded"]}
-]}
-```
+	HTTP/1.1 200 OK
+	...
+	Content-Type: application/json; charset=utf-8
+	...
+	Content-Length: ...
+	{"CustomerID":2,"CustomerName":"Bert","Links":[
+	  {"Relationship":"self",
+	   "HRef":"http://adventure-works.com/customers/2",
+	   "Action":"GET",
+	   "LinkedResourceMIMETypes":["text/xml","application/json"]},
+	  {"Relationship":"self",
+	   "HRef":"http://adventure-works.com/customers/2",
+	   "Action":"PUT",
+	   "LinkedResourceMIMETypes":["application/x-www-form-urlencoded"]},
+	  {"Relationship":"self",
+	   "HRef":"http://adventure-works.com/customers/2",
+	   "Action":"DELETE",
+	   "LinkedResourceMIMETypes":[]},
+	  {"Relationship":"orders",
+	   "HRef":"http://adventure-works.com/customers/2/orders",
+	   "Action":"GET",
+	   "LinkedResourceMIMETypes":["text/xml","application/json"]},
+	  {"Relationship":"orders",
+	   "HRef":"http://adventure-works.com/customers/2/orders",
+	   "Action":"POST",
+	   "LinkedResourceMIMETypes":["application/x-www-form-urlencoded"]}
+	]}
+	```
 
 	In this example, the customer data is represented by the _Customer_ class shown in the following code snippet. The HATEOAS links are held in the _Links_ collection property:
 
 	```C#
-public class Customer
-{
-    public int CustomerID { get; set; }
-    public string CustomerName { get; set; }
-    public List<Link> Links { get; set; }
-    ...
-}
+	public class Customer
+	{
+    	public int CustomerID { get; set; }
+    	public string CustomerName { get; set; }
+    	public List<Link> Links { get; set; }
+    	...
+	}
 
-public class Link
-{
-    public string Relationship { get; set; }
-    public string HRef { get; set; }
-    public string Action { get; set; }
-    public string [] LinkedResourceMIMETypes { get; set; }
-}
-```
+	public class Link
+	{
+    	public string Relationship { get; set; }
+    	public string HRef { get; set; }
+    	public string Action { get; set; }
+    	public string [] LinkedResourceMIMETypes { get; set; }
+	}
+	```
 
 	The HTTP GET operation retrieves the customer data from storage and constructs a _Customer_ object, and then populates the _Links_ collection. The result is formatted as a JSON response message. Each link comprises the following fields:
 
@@ -315,49 +315,49 @@ By default, in the ASP.NET Web API framework, if an operation throws an uncaught
 The following code shows an example that traps different conditions and returns an appropriate response.
 
 	```C#
-[HttpDelete]
-[Route("customers/{id:int}")]
-public HttpResponseMessage DeleteCustomer(int id)
-{
-    try
-    {
-        // Find the customer to be deleted in the repository
-        var customerToDelete = repository.GetCustomer(id);
-        // If there is no such customer, return an error response
-        // with status code 404 (Not Found) and
-        // the message "Customer not found"
-        if (customerToDelete == null)
-        {
-            return Request.CreateErrorResponse(
-                HttpStatusCode.NotFound, Strings.CustomerNotFound);
-        }
-        // Remove the customer from the repository
-        // The DeleteCustomer method returns true if the customer
-        // was successfully deleted
-        if (repository.DeleteCustomer(id))
-        {
-            // Return a response message with status code 204 (No Content)
-            // To indicate that the operation was successful
-            return Request.CreateResponse(HttpStatusCode.NoContent);
-        }
-        else
-        {
-            // Otherwise return an error response with status code
-            // 400 (Bad Request) and the message "Customer not deleted"
-            return Request.CreateResponse(
-                HttpStatusCode.BadRequest, Strings.CustomerNotDeleted);
-        }
-    }
-    catch
-    {
-        // If an uncaught exception occurs, return an error response
-        // with status code 500 (Internal Server Error)
-        // and a meaningful message
-        return Request.CreateErrorResponse(
-            HttpStatusCode.InternalServerError, Strings.ServerError);
-    }
-}
-```
+	[HttpDelete]
+	[Route("customers/{id:int}")]
+	public HttpResponseMessage DeleteCustomer(int id)
+	{
+	    try
+	    {
+	        // Find the customer to be deleted in the repository
+	        var customerToDelete = repository.GetCustomer(id);
+	        // If there is no such customer, return an error response
+	        // with status code 404 (Not Found) and
+	        // the message "Customer not found"
+	        if (customerToDelete == null)
+	        {
+	            return Request.CreateErrorResponse(
+	                HttpStatusCode.NotFound, Strings.CustomerNotFound);
+	        }
+	        // Remove the customer from the repository
+	        // The DeleteCustomer method returns true if the customer
+	        // was successfully deleted
+	        if (repository.DeleteCustomer(id))
+	        {
+	            // Return a response message with status code 204 (No Content)
+	            // To indicate that the operation was successful
+	            return Request.CreateResponse(HttpStatusCode.NoContent);
+	        }
+	        else
+	        {
+	            // Otherwise return an error response with status code
+	            // 400 (Bad Request) and the message "Customer not deleted"
+	            return Request.CreateResponse(
+	                HttpStatusCode.BadRequest, Strings.CustomerNotDeleted);
+	        }
+	    }
+	    catch
+	    {
+	        // If an uncaught exception occurs, return an error response
+	        // with status code 500 (Internal Server Error)
+	        // and a meaningful message
+	        return Request.CreateErrorResponse(
+	            HttpStatusCode.InternalServerError, Strings.ServerError);
+	    }
+	}
+	```
 
 	> **Tip**: Do not include information that could be useful to an attacker attempting to penetrate your web API.
 
@@ -394,41 +394,42 @@ In a distributed environment such as that involving a web server and client appl
 	The HTTP 1.1 protocol supports client-side caching through the use of the Cache-Control header. When a client application sends an HTTP GET request to the web API, the response can include a Cache-Control header that indicates whether the data in the body of the response can be safely cached by the client, and for how long before it should expire and be considered out-of-date. The following example shows an HTTP GET request and the corresponding response that includes a Cache-Control header:
 
 	```HTTP
-GET http://adventure-works.com/orders/2 HTTP/1.1
-...```
+	GET http://adventure-works.com/orders/2 HTTP/1.1
+	...
+	```
 
 	```HTTP
-HTTP/1.1 200 OK
-...
-Cache-Control: max-age=600, private
-Content-Type: text/json; charset=utf-8
-Content-Length: ...
-{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}
-```
+	HTTP/1.1 200 OK
+	...
+	Cache-Control: max-age=600, private
+	Content-Type: text/json; charset=utf-8
+	Content-Length: ...
+	{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}
+	```
 
 	In this example, the Cache-Control header specifies that the data returned should be expired after 600 seconds, and is only suitable for a single client and must not be stored in a shared cache used by other clients (it is _private_). The Cache-Control header could specify _public_ rather than _private_ in which case the data can be stored in a shared cache, or it could specify no-cache in which case the data should not be cached. The following code example shows how to construct a Cache-Control header in a response message:
 
 	```C#
-public class OrdersController : ApiController
-{
-    ...
-    [Route("api/orders/{id:int:min(0)}")]
-    [HttpGet]
-    public HttpResponseMessage FindOrderByID(int id)
-    {
-        // Find the matching order
-        var order = ...
-        // Construct the response
-        var response = Request.CreateResponse(HttpStatusCode.OK, order);
-        // Add the Cache-Control header to the response
-        response.Headers.CacheControl = new CacheControlHeaderValue();
-        response.Headers.CacheControl.Private = true;
-        response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
-        return response;
-    }
-    ...
-}
-```
+	public class OrdersController : ApiController
+	{
+    	...
+    	[Route("api/orders/{id:int:min(0)}")]
+    	[HttpGet]
+    	public HttpResponseMessage FindOrderByID(int id)
+    	{
+    	    // Find the matching order
+    	    var order = ...
+    	    // Construct the response
+    	    var response = Request.CreateResponse(HttpStatusCode.OK, order);
+    	    // Add the Cache-Control header to the response
+    	    response.Headers.CacheControl = new CacheControlHeaderValue();
+    	    response.Headers.CacheControl.Private = true;
+    	    response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
+    	    return response;
+    	}
+    	...
+	}
+	```
 
 	Cache management is the responsibility of the client application, but if properly implemented it can save bandwidth and improve performance by removing the need to fetch data that has already been recently retrieved.
 
@@ -443,40 +444,40 @@ public class OrdersController : ApiController
 	When a client application retrieves an object, the response message can also include an _ETag_ (Entity Tag). An ETag is an opaque string that indicates the version of a resource; each time a resource changes the Etag is also modified. This ETag should be cached as part of the data by the client application. The following code example shows how to add an ETag as part of the response to an HTTP GET request. This code uses the _GetHashCode_ method of an object to generate a numeric value that identifies the object (you can override this method if necessary and generate your own hash using a technology such as MD5) :
 
 	```C#
-public class OrdersController : ApiController
-{
-    ...
-    [Route("api/orders/{id:int:min(0)}")]
-    [HttpGet]
-    public HttpResponseMessage FindOrderByID(int id)
-    {
-        // Find the matching order
-        var order = ...
-        // Construct the response
-        var response = Request.CreateResponse(HttpStatusCode.OK, order);
-        // Add the Cache-Control header to the response
-        ...
-        // Generate an ETag and add it to the response
-        var hashedOrder = order.GetHashCode();
-        response.Headers.ETag =
-            new EntityTagHeaderValue(String.Format("\"{0}\"", hashedOrder));
-        return response;
-    }
-    ...
-}
-```
+	public class OrdersController : ApiController
+	{
+    	...
+    	[Route("api/orders/{id:int:min(0)}")]
+    	[HttpGet]
+    	public HttpResponseMessage FindOrderByID(int id)
+    	{
+        	// Find the matching order
+        	var order = ...
+        	// Construct the response
+        	var response = Request.CreateResponse(HttpStatusCode.OK, order);
+        	// Add the Cache-Control header to the response
+        	...
+        	// Generate an ETag and add it to the response
+        	var hashedOrder = order.GetHashCode();
+        	response.Headers.ETag =
+            	new EntityTagHeaderValue(String.Format("\"{0}\"", hashedOrder));
+        	return response;
+    	}
+    	...
+	}
+	```
 
 	The response message posted by the web API looks like this:
 
 	```HTTP
-HTTP/1.1 200 OK
-...
-Cache-Control: max-age=600, private
-Content-Type: text/json; charset=utf-8
-ETag: "2147483648"
-Content-Length: ...
-{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}
-```
+	HTTP/1.1 200 OK
+	...
+	Cache-Control: max-age=600, private
+	Content-Type: text/json; charset=utf-8
+	ETag: "2147483648"
+	Content-Length: ...
+	{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}
+	```
 
 	> **Tip**: For security reasons, do not allow sensitive data or data returned over an authenticated (HTTPS) connection to be cached.
 
@@ -485,10 +486,10 @@ Content-Length: ...
 	a. The client constructs a GET request containing the ETag for the currently cached version of the resource referenced in an If-None-Match HTTP header:
 
 	```HTTP
-GET http://adventure-works.com/orders/2 HTTP/1.1
-If-None-Match: "2147483648"
-...
-```
+	GET http://adventure-works.com/orders/2 HTTP/1.1
+	If-None-Match: "2147483648"
+	...
+	```
 
 	b. The GET operation in the web API obtains the current ETag for the requested data (order 2 in the above example), and compares it to the value in the If-None-Match header.
 
@@ -505,50 +506,50 @@ If-None-Match: "2147483648"
 	The code below shows the _FindOrderByID_ method extended to support the If-None-Match header. Notice that if the If-None-Match header is omitted, the specified order is always retrieved:
 
 	```C#
-public class OrdersController : ApiController
-{
-    ...
-    [Route("api/orders/{id:int:min(0)}")]
-    [HttpGet]
-    public HttpResponseMessage FindOrderByID(int id)
-    {
-        // Find the matching order
-        var order = ...
-        // If there is no matching order, then return an HTTP Not Found error
-        if (order == null)
-        {
-            return Request.CreateErrorResponse(
-                HttpStatusCode.NotFound, Strings.OrderNotFound);
-        }
-        ...
-        var hashedOrder = order.GetHashCode();
-        string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
-        HttpResponseMessage response = null;
-        // Retrieve the If-None-Match header from the request (if it exists)
-        var nonMatchEtags = Request.Headers.IfNoneMatch;
-        // If there is an Etag in the If-None-Match header and
-        // this etag matches that of the order just retrieved,
-        // then create a Not Modified response message
-        if (nonMatchEtags.Count > 0 &&
-            String.Compare(nonMatchEtags.First().Tag, hashedOrderEtag) == 0)
-        {
-            response = Request.CreateResponse(HttpStatusCode.NotModified);
-        }
-        // Otherwise create a response message that contains the order details
-        else
-        {
-            response = Request.CreateResponse(HttpStatusCode.OK, order);
-        }
-        // Add the Cache-Control and Etag headers to the response
-        response.Headers.CacheControl = new CacheControlHeaderValue();
-        response.Headers.CacheControl.Private = true;
-        response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
-        response.Headers.ETag = new EntityTagHeaderValue(hashedOrderEtag);
-        return response;
-    }
-    ...
-}
-```
+	public class OrdersController : ApiController
+	{
+   		...
+    	[Route("api/orders/{id:int:min(0)}")]
+    	[HttpGet]
+    	public HttpResponseMessage FindOrderByID(int id)
+    	{
+        	// Find the matching order
+        	var order = ...
+        	// If there is no matching order, then return an HTTP Not Found error
+        	if (order == null)
+        	{
+            	return Request.CreateErrorResponse(
+            	    HttpStatusCode.NotFound, Strings.OrderNotFound);
+        	}
+        	...
+        	var hashedOrder = order.GetHashCode();
+        	string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
+        	HttpResponseMessage response = null;
+        	// Retrieve the If-None-Match header from the request (if it exists)
+        	var nonMatchEtags = Request.Headers.IfNoneMatch;
+        	// If there is an Etag in the If-None-Match header and
+        	// this etag matches that of the order just retrieved,
+        	// then create a Not Modified response message
+        	if (nonMatchEtags.Count > 0 &&
+            	String.Compare(nonMatchEtags.First().Tag, hashedOrderEtag) == 0)
+        	{
+            	response = Request.CreateResponse(HttpStatusCode.NotModified);
+        	}
+        	// Otherwise create a response message that contains the order details
+        	else
+        	{
+            	response = Request.CreateResponse(HttpStatusCode.OK, order);
+        	}
+        	// Add the Cache-Control and Etag headers to the response
+        	response.Headers.CacheControl = new CacheControlHeaderValue();
+        	response.Headers.CacheControl.Private = true;
+        	response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
+        	response.Headers.ETag = new EntityTagHeaderValue(hashedOrderEtag);
+        	return response;
+    	}
+    	...
+	}
+	```
 
 	> **Tip**: In this example, the ETag for the data is generated by hashing the data retrieved from the underlying data source. If the ETag can be computed in some other way, then the process can be optimized further and the data only needs to be fetched from the data source if it has changed.  This approach is especially useful if the data is large or accessing the data source can result in significant latency (for example, if the data source is a remote database).
 
@@ -559,14 +560,14 @@ public class OrdersController : ApiController
 	a. The client constructs a PUT request containing the new details for the resource and the ETag for the currently cached version of the resource referenced in an If-Match HTTP header. The following example shows a PUT request that updates an order:
 
 	```HTTP
-PUT http://adventure-works.com/orders/1 HTTP/1.1
-If-None-Match: "2282343857"
-Content-Type: application/x-www-form-urlencoded
-...
-Date: Fri, 12 Sep 2014 09:18:37 GMT
-Content-Length: ...
-ProductID=3&Quantity=5&OrderValue=250
-```
+	PUT http://adventure-works.com/orders/1 HTTP/1.1
+	If-None-Match: "2282343857"
+	Content-Type: application/x-www-form-urlencoded
+	...
+	Date: Fri, 12 Sep 2014 09:18:37 GMT
+	Content-Length: ...
+	ProductID=3&Quantity=5&OrderValue=250
+	```
 
 	b. The PUT operation in the web API obtains the current ETag for the requested data (order 1 in the above example), and compares it to the value in the If- Match header.
 
@@ -581,59 +582,59 @@ ProductID=3&Quantity=5&OrderValue=250
 	The next code example shows an implementation of the PUT operation for the Orders controller:
 
 	```C#
-public class OrdersController : ApiController
-{
-    ...
-    [HttpPut]
-    [Route("api/orders/{id:int}")]
-    public HttpResponseMessage UpdateExistingOrder(int id, Order order)
-    {
-        // Find the order to update
-        var orderToUpdate = ...
-        // If there is no matching order, then return an HTTP Not Found error
-        if (orderToUpdate == null)
-        {
-            return Request.CreateErrorResponse(
-                HttpStatusCode.NotFound, Strings.OrderNotFound);
-        }
-        // Calculate the ETag for the order to be updated
-        var hashedOrder = orderToUpdate.GetHashCode();
-        string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
-        // Retrieve the If-Match header from the request (if it exists)
-        var matchEtags = Request.Headers.IfMatch;
-        // If there is an Etag in the If-Match header and
-        // this etag matches that of the order just retrieved,
-        // or if there is no etag, then update the Order
-        if (((matchEtags.Count > 0 &&
-             String.Compare(matchEtags.First().Tag, hashedOrderEtag) == 0)) ||
-             matchEtags.Count == 0)
-        {
-            // Modify the order
-            orderToUpdate.OrderValue = order.OrderValue;
-            orderToUpdate.ProductID = order.ProductID;
-            orderToUpdate.Quantity = order.Quantity;
-            ...
-            // Save the order back to the data store
-            ...
-            // Create the No Content response with Cache-Control,
-            // ETag, and Location headers
-            var response = Request.CreateResponse(HttpStatusCode.NoContent);
-            response.Headers.CacheControl = new CacheControlHeaderValue();
-            response.Headers.CacheControl.Private = true;
-            response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
-            hashedOrder = order.GetHashCode();
-            hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
-            response.Headers.ETag = new EntityTagHeaderValue(hashedOrderEtag);
-            response.Headers.Location = new Uri(...);
-            return response;
-        }
-        // Otherwise return a Precondition Failed response
-        return Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed,
-            Strings.ConflictingOrderUpdate);
-    }
-    ...
-}
-```
+	public class OrdersController : ApiController
+	{
+   		...
+    	[HttpPut]
+    	[Route("api/orders/{id:int}")]
+    	public HttpResponseMessage UpdateExistingOrder(int id, Order order)
+    	{
+        	// Find the order to update
+        	var orderToUpdate = ...
+        	// If there is no matching order, then return an HTTP Not Found error
+        	if (orderToUpdate == null)
+        	{
+            	return Request.CreateErrorResponse(
+            	    HttpStatusCode.NotFound, Strings.OrderNotFound);
+        	}
+        	// Calculate the ETag for the order to be updated
+        	var hashedOrder = orderToUpdate.GetHashCode();
+        	string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
+        	// Retrieve the If-Match header from the request (if it exists)
+        	var matchEtags = Request.Headers.IfMatch;
+        	// If there is an Etag in the If-Match header and
+        	// this etag matches that of the order just retrieved,
+        	// or if there is no etag, then update the Order
+        	if (((matchEtags.Count > 0 &&
+             	String.Compare(matchEtags.First().Tag, hashedOrderEtag) == 0)) ||
+             	matchEtags.Count == 0)
+        	{
+            	// Modify the order
+            	orderToUpdate.OrderValue = order.OrderValue;
+            	orderToUpdate.ProductID = order.ProductID;
+            	orderToUpdate.Quantity = order.Quantity;
+            	...
+            	// Save the order back to the data store
+            	...
+            	// Create the No Content response with Cache-Control,
+            	// ETag, and Location headers
+            	var response = Request.CreateResponse(HttpStatusCode.NoContent);
+            	response.Headers.CacheControl = new CacheControlHeaderValue();
+            	response.Headers.CacheControl.Private = true;
+            	response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
+            	hashedOrder = order.GetHashCode();
+            	hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
+            	response.Headers.ETag = new EntityTagHeaderValue(hashedOrderEtag);
+            	response.Headers.Location = new Uri(...);
+            	return response;
+        	}
+        	// Otherwise return a Precondition Failed response
+        	return Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed,
+            	Strings.ConflictingOrderUpdate);
+    	}
+    	...
+	}
+	```
 
 	> **Tip**: Use of the If-Match header is entirely optional, and if it is omitted the web API will always attempt to update the specified order, possibly blindly overwriting an update made by another user. To avoid problems due to lost updates, always provide an If-Match header.
 
@@ -650,97 +651,97 @@ There may be occasions when a client application needs to issue requests that se
 	You can implement chunking in the ASP.NET Web API by using the _PushStreamContent_ class. The following example shows an operation that responds to HTTP GET requests for product images. Each product has its own image held in blob storage, and the Get method uses a _PushStreamContent_ object to read the image data from appropriate blob and transmit it asynchronously as the content of the response message:
 
 	```C#
-public class ProductImagesController : ApiController
-{
-    ...
-    [HttpGet]
-    [Route("productimages/{id:int}")]
-    public HttpResponseMessage Get(int id)
-    {
-        try
-        {
-            var container =
-                ConnectToBlobContainer(...);
-            if (!BlobExists(container, string.Format("image{0}.jpg", id)))
-            {
-                return Request.CreateErrorResponse(
-                    HttpStatusCode.NotFound, Strings.NoSuchImageFile);
-            }
-            var response = Request.CreateResponse();
-            response.Content = new PushStreamContent(
-                async (outputStream, httpContent, transportContent) =>
-            {
-                try
-                {
-                    CloudBlockBlob blockBlob =
-                        container.GetBlockBlobReference(
-                            String.Format("image{0}.jpg", id));
-                    await blockBlob.DownloadToStreamAsync(outputStream);
-                }
-                finally
-                {
-                    outputStream.Close();
-                }
-            });
-            response.StatusCode = HttpStatusCode.OK;
-            response.Content.Headers.ContentType =
-                new MediaTypeHeaderValue("image/jpeg");
-            return response;
-        }
-        catch
-        {
-            return Request.CreateErrorResponse(
-                HttpStatusCode.InternalServerError, Strings.ServerError);
-        }
-    }
-    ...
-}
-```
+	public class ProductImagesController : ApiController
+	{
+    	...
+    	[HttpGet]
+    	[Route("productimages/{id:int}")]
+    	public HttpResponseMessage Get(int id)
+    	{
+        	try
+        	{
+        	    var container =
+        	        ConnectToBlobContainer(...);
+        	    if (!BlobExists(container, string.Format("image{0}.jpg", id)))
+        	    {
+        	        return Request.CreateErrorResponse(
+        	            HttpStatusCode.NotFound, Strings.NoSuchImageFile);
+        	    }
+        	    var response = Request.CreateResponse();
+        	    response.Content = new PushStreamContent(
+        	        async (outputStream, httpContent, transportContent) =>
+        	    {
+        	        try
+        	        {
+        	            CloudBlockBlob blockBlob =
+        	                container.GetBlockBlobReference(
+        	                    String.Format("image{0}.jpg", id));
+        	            await blockBlob.DownloadToStreamAsync(outputStream);
+        	        }
+        	        finally
+        	        {
+        	            outputStream.Close();
+        	        }
+        	    });
+        	    response.StatusCode = HttpStatusCode.OK;
+        	    response.Content.Headers.ContentType =
+        	        new MediaTypeHeaderValue("image/jpeg");
+        	    return response;
+        	}
+        	catch
+        	{
+        	    return Request.CreateErrorResponse(
+        	        HttpStatusCode.InternalServerError, Strings.ServerError);
+        	}
+    	}
+    	...
+	}
+	```
 
 	In this example, _ConnectBlobToContainer_ is a helper method that connects to a specified container (name not shown) in Azure Blob storage. _BlobExists_ is another helper method that returns a Boolean value that indicates whether a blob with the specified name exists in the blob storage container.
 
 	You can also apply streaming to upload operations if a client needs to POST a new resource that includes a large object. The next example shows the Post method for the _ProductImages_ controller. This method enables the client to upload a new product image:
 
 	```C#
-public class ProductImagesController : ApiController
-{
-    ...
-    [HttpPost]
-    [Route("productimages")]
-    public async Task<HttpResponseMessage> Post()
-    {
-        try
-        {
-            if (!Request.Content.Headers.ContentType.MediaType.Equals(
-                   "image/jpeg"))
-            {
-                return Request.CreateErrorResponse(
-                    HttpStatusCode.UnsupportedMediaType,
-                    Strings.MediaNotSupported);
-            }
-            var container = ConnectToBlobContainer(...);
-            int id = ... // Create a new ID for the image
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(
-                String.Format("image{0}.jpg", id));
-            await blockBlob.UploadFromStreamAsync(
-                await Request.Content.ReadAsStreamAsync());
-            var response = Request.CreateResponse(HttpStatusCode.OK);
-            var baseUri = string.Format("{0}://{1}:{2}",
-                Request.RequestUri.Scheme, Request.RequestUri.Host,
-                Request.RequestUri.Port);
-            response.Headers.Location =
-                new Uri(string.Format("{0}/productimages/{1}", baseUri, id));
-            return response;
-        }
-        catch
-        {
-            return Request.CreateErrorResponse(
-                HttpStatusCode.InternalServerError, Strings.ServerError);
-        }
-    }
-    ...
-}
-```
+	public class ProductImagesController : ApiController
+	{
+    	...
+    	[HttpPost]
+    	[Route("productimages")]
+    	public async Task<HttpResponseMessage> Post()
+    	{
+    	    try
+    	    {
+    	        if (!Request.Content.Headers.ContentType.MediaType.Equals(
+    	               "image/jpeg"))
+    	        {
+    	            return Request.CreateErrorResponse(
+    	                HttpStatusCode.UnsupportedMediaType,
+    	                Strings.MediaNotSupported);
+    	        }
+    	        var container = ConnectToBlobContainer(...);
+    	        int id = ... // Create a new ID for the image
+    	        CloudBlockBlob blockBlob = container.GetBlockBlobReference(
+    	            String.Format("image{0}.jpg", id));
+    	        await blockBlob.UploadFromStreamAsync(
+    	            await Request.Content.ReadAsStreamAsync());
+    	        var response = Request.CreateResponse(HttpStatusCode.OK);
+    	        var baseUri = string.Format("{0}://{1}:{2}",
+    	            Request.RequestUri.Scheme, Request.RequestUri.Host,
+    	            Request.RequestUri.Port);
+    	        response.Headers.Location =
+    	            new Uri(string.Format("{0}/productimages/{1}", baseUri, id));
+    	        return response;
+    	    }
+    	    catch
+    	    {
+    	        return Request.CreateErrorResponse(
+    	            HttpStatusCode.InternalServerError, Strings.ServerError);
+    	    }
+    	}
+    	...
+	}
+	```
 
 	> **Tip**: The volume of data that you can upload to a web service is not constrained by streaming, and a single request could conceivably result in a massive object that consumes considerable resources. If, during the streaming process, the web API determines that the amount of data in a request has exceeded some acceptable bounds, it can abort the operation and return a response message with status code 413 (Request Entity Too Large).
 
@@ -765,21 +766,21 @@ public class ProductImagesController : ApiController
 	To handle these cases, the web API should support query strings that enable the client application to refine requests or fetch data in more manageable, discrete blocks (or pages). The ASP.NET Web API framework parses query strings and splits them up into a series of parameter/value pairs which are passed to the appropriate method, following the routing rules described earlier. The method should be implemented to accept these parameters using the same names specified in the query string. Additionally, these parameters should be optional (in case the client omits the query string from a request) and have meaningful default values. The code below shows the _GetAllOrders_ method in the _Orders_ controller. This method retrieves the details of orders. If this method was unconstrained, it could conceivably return a large amount of data. The _limit_ and _offset_ parameters are intended to reduce the volume of data to a smaller subset, in this case only the first 10 orders by default:
 
 	```C#
-public class OrdersController : ApiController
-{
-    ...
-    [Route("api/orders")]
-    [HttpGet]
-    public IEnumerable<Order> GetAllOrders(int limit=10, int offset=0)
-    {
-        // Find the number of orders specified by the limit parameter
-        // starting with the order specified by the offset parameter
-        var orders = ...
-        return orders;
-    }
-    ...
-}
-```
+	public class OrdersController : ApiController
+	{
+    	...
+    	[Route("api/orders")]
+    	[HttpGet]
+    	public IEnumerable<Order> GetAllOrders(int limit=10, int offset=0)
+    	{
+    	    // Find the number of orders specified by the limit parameter
+    	    // starting with the order specified by the offset parameter
+    	    var orders = ...
+    	    return orders;
+    	}
+    	...
+	}
+	```
 
 	A client application can issue a request to retrieve 30 orders starting at offset 50 by using the URI _http://www.adventure-works.com/api/orders?limit=30&offset=50_.
 
