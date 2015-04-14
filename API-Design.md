@@ -1,5 +1,5 @@
-﻿# API design guidance
-## Overview 
+# API design guidance
+## Overview
 Many modern web-based solutions make the use of web services, hosted by web servers, to provide functionality for remote client applications. The operations that a web service exposes constitute a web API. The purpose of this guidance is to describe the issues that you should consider when designing a web API.
 
 A variety of different mechanisms, data formats, and protocols aimed at abstracting the technology used to implement web services from the client applications that connect to them, have been developed; the aim of this approach being to reduce dependencies between the web services and the clients that utilize them. Some of these protocols, such as SOAP, are highly functional but are often considered too cumbersome for many common situations. The most recent incarnations of web APIs are based on HTTP, the transport protocol used to transmit data across the web (HTTP is also the protocol that underpins many implementations of SOAP).
@@ -15,16 +15,14 @@ The REST model uses a navigational scheme to represent business objects and serv
 
 Another crucial point in implementing an effective REST model is to understand the relationships between the various resources to which the model provides access. These resources are typically organized as collections and relationships. For example, in the ecommerce system described earlier, a quick analysis shows that there are two collections involved: orders and customers. Each order and customer should have its own unique key for identification purposes. The URI to access the collection of orders could be something as simple as _/orders_, and similarly the URI for retrieving all customers could be _/customers_. Issuing an HTTP GET request to the _/orders_ URI should return a list representing all orders in the collection encoded as an HTTP response:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/orders HTTP/1.1
 ...
 ```
 
 The response shown below encodes the orders as an XML list structure. The list contains 7 orders:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Date: Fri, 22 Aug 2014 08:49:02 GMT
@@ -33,14 +31,12 @@ Content-Length: ...
 ```
 To fetch an individual order requires specifying the identifier for the order from the _orders_ resource, such as _/orders/2_:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/orders/2 HTTP/1.1
 ...
 ```
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Date: Fri, 22 Aug 2014 08:49:02 GMT
@@ -55,7 +51,7 @@ Notice that the response from a REST request makes use of the standard HTTP stat
 
 ## Design and structure of a RESTful web API
 
-The keys to designing a successful web API are simplicity and consistency. A Web API that exhibits these two factors makes it easier to build client applications that need to consume the API. 
+The keys to designing a successful web API are simplicity and consistency. A Web API that exhibits these two factors makes it easier to build client applications that need to consume the API.
 
 A RESTful web API is focused on exposing a set of connected resources, and providing the core operations that enable an application to manipulate these resources and easily navigate between them. For this reason, the URIs that constitute a typical RESTful web API should be oriented towards the data that it exposes, and use the facilities provided by HTTP to operate on this data. This approach requires a different mindset from that typically employed when designing a set of classes in an object-oriented API which tends to be more motivated by the behavior of objects and classes. Additionally, a RESTful web API should be stateless and not depend on operations being invoked in a particular sequence. In its simplest form, a RESTful web API acts like a simple database where the data is accessible through a navigable hierarchy, and with HTTP verbs implementing a CRUD (create-retrieve-update-delete) interface. The following sections summarize the points you should consider when designing a RESTful web API.
 
@@ -74,7 +70,7 @@ Individual entities rarely exist in isolation (although some singleton objects m
 You also need to consider the relationships between different types of resources and how you might expose these associations. For example, customers may place zero or more orders. A natural way to represent this relationship would be through a URI such as _/customers/5/orders_ to find all the orders for customer 5. You might also consider representing the association from an order back to a specific customer through a URI such as _/orders/99/customer_ to find the customer for order 99, but extending this model too far can become cumbersome to implement. A better solution is to provide navigable links to associated resources, such as the customer, in the body of the HTTP response message returned when the order is queried. This mechanism is described in more detail in the section [Using the HATEOAS Approach to Enable Navigation To Related Resources](#insertlink#) later in this guidance.
 
 > **Note**: The Open Data protocol (OData) adopts the convention that all attributes of resources can be exposed by URIs, although the format of the URI for accessing a single resource in a collection is slightly different from that adopted by the conventional REST approach. For example, querying the URI _/orders(99)/customer_ would return the customer (notice that the ID of the order is specified in parentheses), and _/orders(99)/ordervalue_ might return the value of the order. For more information about the OData protocol see the [OData home page](#insertlink#). The [ASP.NET Web API OData](#insertlink#) page provides tutorials and examples showing how to create OData endpoints by using the OData protocol.
-> 
+>
 > Frameworks such as WCF Data Services also adopt the OData approach. The page [WCF Data Services 5.6](#insertlink#) contains information and examples on using WCF Data Services.
 
 In more complex systems there may be many more types of entity, and it can be tempting to provide URIs that enable a client application to navigate through several levels of relationships, such as _/customers/1/orders/99/products_ to obtain the list of products in order 99 placed by customer 1. However, this level of complexity can be difficult to maintain and is inflexible if the relationships between resources change in the future. Rather, you should seek to keep queries relatively simple. Bear in mind that once an application has a reference to a resource, it should be possible to use this reference to find items related to that resource. The preceding query can be replaced with the URI _/customers/1/orders_ to find all the orders for customer 1, and then query the URI _/orders/99/products_ to find the products in this order (assuming order 99 was placed by customer 1). This is the approach described in more detail in the section [Using the HATEOAS Approach to Enable Navigation to Related Resources](#insertlink#) later in this document.
@@ -106,7 +102,7 @@ The effect of a specific request should depend on whether the resource to which 
 |---------------------------|-----------------------------------------|-------------------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------|
 | /customers<br /><br /><br />/customers/1<br /><br /><br /><br />/customers/1/orders<br /><br /> | Create a new<br />customer<br /><br />Error<br /><br /><br /><br />Create a new order<br />for customer 1 | Retrieve all<br />customers<br /><br />Retrieve the details<br />for customer 1<br /><br /><br />Retrieve all orders<br />for customer 1<br /> | Bulk update of<br />customers (_if<br />implemented_)<br />Update the details of<br />customer 1 if it<br />exists, otherwise<br />return an error<br />Bulk update of<br />orders for customer 1<br />(if implemented) | Remove all<br />customers (_if<br />implemented_)<br />Remove customer 1<br /><br /><br /><br />Remove all orders<br />for customer 1<br />(_if implemented_) |
 
-The purpose of GET and DELETE requests are relatively straightforward, but there is scope for confusion concerning the purpose and effects of POST and PUT requests. 
+The purpose of GET and DELETE requests are relatively straightforward, but there is scope for confusion concerning the purpose and effects of POST and PUT requests.
 
 A POST request creates a new resource with data provided in the body of the request. In the REST model, it only makes sense to apply POST requests to resources that are collections; the new resource is added to the collection. A PUT request is intended to modify an existing resource. If the specified resource does not exist, the PUT request should return an error. PUT requests are most frequently applied to resources that are individual items (such as a specific customer or order), although they can be applied to collections, although this is less-commonly implemented. Note that PUT requests are idempotent whereas POST requests are not; if an application submits the same PUT request multiple times the results should always be the same (the same resource will be modified with the same values), but if an application repeats the same POST request the result will be the creation of multiple resources.
 
@@ -117,8 +113,7 @@ The data included by a client application in many HTTP requests, and the corresp
 
 When a client application sends a request that returns data in the body of a message, it can specify the formats it can handle in the Accept header of the request. The following code illustrates an HTTP GET request that retrieves the details of customer 1 and expects the result to be returned as JSON:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/orders/2 HTTP/1.1
 ...
 Accept: application/json
@@ -129,8 +124,7 @@ If the web server supports this format, it can reply with a response that includ
 
 > **Note**: For maximum interoperability, the formats referenced in the Accept and Content-Type headers should be recognized MIME types rather than some custom format.
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -144,8 +138,7 @@ If the web server does not support the requested format, it can send the data in
 
 Note that in this example, the web server successfully retrieves the requested data and indicates success by passing back a status code of 200 in the response header. If no matching data is found, it should instead return a status code of 404 (not found) and the body of the response message can contain additional information. The format of this information is specified by the Content-Type header, as shown in the following example:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/orders/222 HTTP/1.1
 ...
 Accept: application/json
@@ -154,8 +147,7 @@ Accept: application/json
 
 Order 222 does not exist, so the response message looks like this:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 404 Not Found
 ...
 Content-Type: application/json; charset=utf-8
@@ -167,8 +159,7 @@ Content-Length: ...
 
 When an application sends an HTTP PUT request to update a resource, it specifies the URI of the resource and provides the data to be modified in the body of the request message. It should also specify the format of this data by using the Content-Type header. A common format used for text-based information is _application/x-www-form-urlencoded_, which comprises a set of name/value pairs separated by the & character. The next example shows an HTTP PUT request that modifies the information in order 1:
 
-```
-HTTP Request
+```HTTP
 PUT http://adventure-works.com/orders/1 HTTP/1.1
 ...
 Content-Type: application/x-www-form-urlencoded
@@ -180,8 +171,7 @@ ProductID=3&Quantity=5&OrderValue=250
 
 If the modification is successful, it should respond with an HTTP 204 status code, indicating that the process has been successfully handled, but that the response body contains no further information. The Location header in the response contains the URI of the newly updated resource:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 204 No Content
 ...
 Location: http://adventure-works.com/orders/1
@@ -197,8 +187,7 @@ Again, if the resource to be updated does not exist, the web server should inste
 
 The format of an HTTP POST requests that create new resources are similar to those of PUT requests; the message body contains the details of the new resource to be added. However, the URI typically specifies the collection to which the resource should be added. The following example creates a new order and adds it to the orders collection:
 
-```
-HTTP Request
+```HTTP
 POST http://adventure-works.com/orders HTTP/1.1
 ...
 Content-Type: application/x-www-form-urlencoded
@@ -210,8 +199,7 @@ ProductID=5&Quantity=15&OrderValue=400
 
 If the request is successful, the web server should respond with a message code with HTTP status code 201 (Created). The Location header should contain the URI of the newly created resource, and the body of the response should contain a copy of the new resource; the Content-Type header specifies the format of this data:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 201 Created
 ...
 Content-Type: application/json; charset=utf-8
@@ -226,16 +214,14 @@ Content-Length: ...
 
 To remove a resource, an HTTP DELETE request simply provides the URI of the resource to be deleted. The following example attempts to remove order 99:
 
-```
-HTTP Request
+```HTTP
 DELETE http://adventure-works.com/orders/99 HTTP/1.1
 ...
 ```
 
 If the delete operation is successful, the web server should respond with HTTP status code 204, indicating that the process has been successfully handled, but that the response body contains no further information (this is the same response returned by a successful PUT operation, but without a Location header as the resource no longer exists.
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 204 No Content
 ...
 Date: Fri, 22 Aug 2014 09:18:37 GMT
@@ -265,7 +251,7 @@ You can extend this approach to limit (project) the fields returned if a single 
 
 > **Tip**: If possible, implement the code that receives and process HTTP GET requests by using a programming language that supports optional parameters and default values. Give all optional parameters meaningful defaults. For example, set the _limit_ parameter to 10 and the _offset_ parameter to 0 if you implement pagination, set the sort parameter to the key of the resource if you implement ordering, and set the _fields_ parameter to all fields in the resource if you support projections.
 
-> **Note**: The OData protocol supports query options that enable filtering and paginating data in a standardized manner: 
+> **Note**: The OData protocol supports query options that enable filtering and paginating data in a standardized manner:
 
 > The _$filter_ option enables a client application to specify ad-hoc criteria that limit the data returned. For example, the URI _/orders?$filter=ProductID eq 99_ retrieves all orders for product 99.
 
@@ -278,16 +264,14 @@ You can extend this approach to limit (project) the fields returned if a single 
 ## Handling large binary resources
 A single resource may contain large binary fields, such as files or images. To overcome the transmission problems caused by unreliable and intermittent connections and to improve response times, consider providing operations that enable such resources to be retrieved in chunks by the client application. To do this, the web API should support the Accept-Ranges header for GET requests for large resources, and ideally implement HTTP HEAD requests for these resources. The Accept-Ranges header indicates that the GET operation supports partial results, and that a client application can submit GET requests that return a subset of a resource specified as a range of bytes. A HEAD request is similar to a GET request except that it only returns a header that describes the resource and an empty message body. A client application can issue a HEAD request to determine whether to fetch a resource by using partial GET requests. The following example shows a HEAD request that obtains information about a product image:
 
-```
-HTTP Request
+```HTTP
 HEAD http://adventure-works.com/products/10?fields=ProductImage HTTP/1.1
 ...
 ```
 
 The response message contains a header that includes the size of the resource (4580 bytes), and the Accept-Ranges header that the corresponding GET operation supports partial results:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Accept-Ranges: bytes
@@ -298,8 +282,7 @@ Content-Length: 4580
 
 The client application can use this information to construct a series of GET operations to retrieve the image in smaller chunks. The first request fetches the first 2500 bytes by using the Range header:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/products/10?fields=ProductImage HTTP/1.1
 Range: bytes=0-2499
 ...
@@ -307,8 +290,7 @@ Range: bytes=0-2499
 
 The response message indicates that this is a partial response by returning HTTP status code 206. The Content-Length header specifies the actual number of bytes returned in the message body (not the size of the resource), and the Content-Range header indicates which part of the resource this is (bytes 0-2499 out of 4580):
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 206 Partial Content
 ...
 Accept-Ranges: bytes
@@ -321,8 +303,7 @@ _{binary data not shown}_
 
 A subsequent request from the client application can retrieve the remainder of the resource by using an appropriate Range header:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/products/10?fields=ProductImage HTTP/1.1
 Range: bytes=2500-
 ...
@@ -330,8 +311,7 @@ Range: bytes=2500-
 
 The corresponding result message should look like this:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 206 Partial Content
 ...
 Accept-Ranges: bytes
@@ -343,14 +323,13 @@ Content-Range: bytes 2500-4580/4580
 
 ## Using the HATEOAS approach to enable navigation to related resources
 
-One of the primary motivations behind REST is that it should be possible to navigate the entire set of resources without requiring prior knowledge of the URI scheme. Each HTTP GET request should return the information necessary to find the resources related directly to the requested object through hyperlinks included in the response, and it should also be provided with information that describes the operations available on each of these resources. This principle is known as HATEOAS, or Hypertext as the Engine of Application State. The system is effectively a finite state machine, and each GET request provides the information necessary to move from one state to another; no other information should be necessary. 
+One of the primary motivations behind REST is that it should be possible to navigate the entire set of resources without requiring prior knowledge of the URI scheme. Each HTTP GET request should return the information necessary to find the resources related directly to the requested object through hyperlinks included in the response, and it should also be provided with information that describes the operations available on each of these resources. This principle is known as HATEOAS, or Hypertext as the Engine of Application State. The system is effectively a finite state machine, and each GET request provides the information necessary to move from one state to another; no other information should be necessary.
 
 > **Note**: Currently there are no standards or specifications that define how to model the HATEOAS principle. The examples shown in this section illustrate one possible solution.
 
 As an example, to handle the relationship between customers and orders, the data returned in the response for a specific order should contain URIs in the form of a hyperlink identifying the customer that placed the order, and the operations that can be performed on that customer.
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/orders/3 HTTP/1.1
 Accept: application/json
 ...
@@ -358,8 +337,7 @@ Accept: application/json
 
 The body of the response message contains a _Links_ array (highlighted in the code example) that specifies the nature of the relationship (_Customer_), the URI of the customer (_http://adventure-works.com/customers/3_), how to retrieve the details of this customer (_GET_), and the MIME types that the web server supports for retrieving this information (_text/xml_ and _application/json_). This is all the information that a client application needs to be able to fetch the details of the customer. Additionally, the Links array also includes links for the other operations that can be performed, such as PUT (to modify the customer, together with the format that the web server expects the client to provide), and DELETE.
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -371,8 +349,7 @@ customer","HRef":" http://adventure-works.com /customers/3", "Action":"PUT","Lin
 
 For completeness, the Links array should also include self-referencing information pertaining to the resource that has been retrieved. These links have been omitted from the previous example, but are highlighted in the following code. Notice that in these links, the relationship _self_ has been used to indicate that this is a reference to the resource being returned by the operation:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -382,10 +359,10 @@ Content-Length: ...
 "HRef":" http://adventure-works.com /customers/3", "Action":"GET","LinkedResourceMIMETypes":["text/xml","application/json"]},{"Relationship":" customer" (customer links omitted)}]}
 ```
 
-For this approach to be effective, client applications must be prepared to retrieve and parse this additional information. 
+For this approach to be effective, client applications must be prepared to retrieve and parse this additional information.
 
 ## Versioning a RESTful web API
-It is highly unlikely that in all but the simplest of situations that a web API will remain static. As business requirements change new collections of resources may be added, the relationships between resources might change, and the structure of the data in resources might be amended. While updating a web API to handle new or differing requirements is a relatively straightforward process, you must consider the effects that such changes will have on client applications consuming the web API. The issue is that although the developer designing and implementing a web API has full control over that API, the developer does not have the same degree of control over client applications which may be built by third party organizations operating remotely. The primary imperative is to enable existing client applications to continue functioning unchanged while allowing new client applications to take advantage of new features and resources. 
+It is highly unlikely that in all but the simplest of situations that a web API will remain static. As business requirements change new collections of resources may be added, the relationships between resources might change, and the structure of the data in resources might be amended. While updating a web API to handle new or differing requirements is a relatively straightforward process, you must consider the effects that such changes will have on client applications consuming the web API. The issue is that although the developer designing and implementing a web API has full control over that API, the developer does not have the same degree of control over client applications which may be built by third party organizations operating remotely. The primary imperative is to enable existing client applications to continue functioning unchanged while allowing new client applications to take advantage of new features and resources.
 
 Versioning enables a web API to indicate the features and resources that it exposes, and a client application can submit requests that are directed to a specific version of a feature or resource. The following sections describe several different approaches, each of which has its own benefits and trade-offs.
 
@@ -394,8 +371,7 @@ This is the simplest approach, and may be acceptable for some internal APIs. Big
 
 For example, a request to the URI _http://adventure-works.com/customers/3_ should return the details of a single customer containing _Id_, _Name_, and _Address_ fields expected by the client application:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -408,8 +384,7 @@ Content-Length: ...
 
 If the _DateCreated_ field is added to the schema of the customer resource, then the response would look like this:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -425,8 +400,7 @@ Each time you modify the web API or change the schema of resources, you add a ve
 
 Extending the previous example, if the _Address_ field is restructured into sub-fields containing each constituent part of the address (such as _StreetAddress_, _City_, _State_, and _ZipCode_), this version of the resource could be exposed through a URI containing a version number, such as http://adventure-works.com/v2/customers/3:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -449,16 +423,14 @@ Rather than appending the version number as a query string parameter, you could 
 
 Version 1:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/customers/3 HTTP/1.1
-... 
+...
 Custom-Header: api-version=1
 ...
 ```
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -469,16 +441,14 @@ Content-Length: ...
 
 Version 2:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/customers/3 HTTP/1.1
-... 
+...
 Custom-Header: api-version=2
 ...
 ```
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/json; charset=utf-8
@@ -492,18 +462,16 @@ Note that as with the previous two approaches, implementing HATEOAS requires inc
 ## Media type versioning
 When a client application sends an HTTP GET request to a web server it should stipulate the format of the content that it can handle by using an Accept header, as described earlier in this guidance. Frequently the purpose of the Accept header is to allow the client application to specify whether the body of the response should be XML, JSON, or some other common format that the client can parse. However, it is possible to define custom media types that include information enabling the client application to indicate which version of a resource it is expecting. The following example shows a request that specifies an Accept header with the value _application/vnd.adventure-works.v1+json_. The _vnd.adventure-works.v1_ element indicates to the web server that it should return version 1 of the resource, while the _json_ element specifies that the format of the response body should be JSON:
 
-```
-HTTP Request
+```HTTP
 GET http://adventure-works.com/customers/3 HTTP/1.1
-... 
+...
 Accept: application/vnd.adventure-works.v1+json
 ...
 ```
 
 The code handling the request is responsible for processing the Accept header and honoring it as far as possible (the client application may specify multiple formats in the Accept header, in which case the web server can choose the most appropriate format for the response body). The web server confirms the format of the data in the response body by using the Content-Type header:
 
-```
-HTTP Response
+```HTTP
 HTTP/1.1 200 OK
 ...
 Content-Type: application/vnd.adventure-works.v1+json; charset=utf-8
@@ -516,7 +484,7 @@ If the Accept header does not specify any known media types, the web server shou
 
 This approach is arguably the purest of the versioning mechanisms and lends itself naturally to HATEOAS, which can include the MIME type of related data in resource links.
 
-> **Note**: When you select a versioning strategy, you should also consider the implications on performance, especially caching on the web server. The URI versioning and Query String versioning schemes are cache-friendly inasmuch as the same URI/query string combination refers to the same data each time. 
+> **Note**: When you select a versioning strategy, you should also consider the implications on performance, especially caching on the web server. The URI versioning and Query String versioning schemes are cache-friendly inasmuch as the same URI/query string combination refers to the same data each time.
 
 > The Header versioning and Media Type versioning mechanisms typically require additional logic to examine the values in the custom header or the Accept header. In a large-scale environment, many clients using different versions of a web API can result in a significant amount of duplicated data in a server-side cache. This issue can become acute if a client application communicates with a web server through a proxy that implements caching, and that only forwards a request to the web server if it does not currently hold a copy of the requested data in its cache.
 
@@ -525,7 +493,7 @@ A web API is typically implemented as a service deployed across one or more web 
 
 - Decoupling security concerns from the web API. The façade can take responsibility for authenticating and authorizing requests. The authentication process can be implemented and configured independently from the web API. The façade can enforce access control and act as a filter for poison message attacks. The web server hosting the web API can be protected behind a firewall that only permits traffic to and from the façade.
 - Regulating the traffic to the web API, throttling or temporarily blocking requests during periods of high demand, and possibly limit the volume of requests that come from a single source (or set of sources). In this way, the façade can help to ensure that throughput meets agreed quality of service parameters, and it can also help to reduce the effects of DDOS attacks.
-- Metering the volume of traffic, which can aid scalability by helping to establish whether to start and stop additional instances of the web server hosting the web API. 
+- Metering the volume of traffic, which can aid scalability by helping to establish whether to start and stop additional instances of the web server hosting the web API.
 - Implementing tiered SLAs (for high value customers), routing traffic to specific high-performance servers based on policy and business agreements for availability.
 - Providing a point for logging requests both for debugging and auditing purposes.
 - Health monitoring. The façade can periodically ping the web server and if it fails to respond it can arrange for the web server to be restarted.
@@ -539,9 +507,9 @@ A web API is typically implemented as a service deployed across one or more web 
 ## Mobile backend as a service (MBaaS)
 API management is primarily concerned with managing and controlling access to a web API. The notion of an MBaaS extends the concept of using a façade to provide common services frequently required by client applications.
 
-Many modern web and mobile applications utilize common features such as cloud-based data storage, authentication based on social network credentials, push notifications to indicate that a significant event has occurred, messaging and chat functions, or simply the ability to remotely run a piece of business logic. Each of these features might require their own APIs to enable client applications to use them, and this can add complexity to the client applications. The purpose of an MBaaS is to provide a single integrated and consistent interface for these features. An MBaaS is typically client-agnostic, frequently being based on HTTP RESTful services. However, many MBaaS solutions also provide language-specific wrappers that implement a higher-level API for client applications. These wrappers transparently convert API calls into HTTP requests and responses. 
+Many modern web and mobile applications utilize common features such as cloud-based data storage, authentication based on social network credentials, push notifications to indicate that a significant event has occurred, messaging and chat functions, or simply the ability to remotely run a piece of business logic. Each of these features might require their own APIs to enable client applications to use them, and this can add complexity to the client applications. The purpose of an MBaaS is to provide a single integrated and consistent interface for these features. An MBaaS is typically client-agnostic, frequently being based on HTTP RESTful services. However, many MBaaS solutions also provide language-specific wrappers that implement a higher-level API for client applications. These wrappers transparently convert API calls into HTTP requests and responses.
 
-Using an MBaaS also provides opportunities for monetizing web APIs, by recording and recharging for API usage for authenticated requests. It may even be possible to provide different levels of service and access to different customers; a premium service for high-paying customers that exposes the full gamut of functionality routed to fast, dedicated hardware and a standard service that limits the features available or runs of lower-grade shared machinery. 
+Using an MBaaS also provides opportunities for monetizing web APIs, by recording and recharging for API usage for authenticated requests. It may even be possible to provide different levels of service and access to different customers; a premium service for high-paying customers that exposes the full gamut of functionality routed to fast, dedicated hardware and a standard service that limits the features available or runs of lower-grade shared machinery.
 
 MBaaS providers offer differing sets of backend tools and services. For example, Windows Azure Mobile Services enables you to quickly generate a backend service that can:
 
@@ -550,7 +518,7 @@ MBaaS providers offer differing sets of backend tools and services. For example,
 - Run background tasks, either on demand from a client or by following a defined schedule, and
 - Notify subscribing client applications of significant events.
 
-Windows Azure Mobile Services supports authentication by using a Microsoft  account or through common social network providers such as Facebook, Twitter, and Google. You can also store user and verify user identity information by using Windows Azure Active Directory. Access to data, REST APIs, and notifications can be made public or limited to authenticated users. 
+Windows Azure Mobile Services supports authentication by using a Microsoft  account or through common social network providers such as Facebook, Twitter, and Google. You can also store user and verify user identity information by using Windows Azure Active Directory. Access to data, REST APIs, and notifications can be made public or limited to authenticated users.
 
 > **Note**: For more information visit the [Mobile Services](http://azure.microsoft.com/en-us/documentation/services/mobile-services/) page on the Microsoft website. The API Implementation Guidance provides more detail and examples on using Windows Azure Mobile Services.
 More information
