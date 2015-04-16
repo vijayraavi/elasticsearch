@@ -26,8 +26,6 @@ These documents focus on the essential aspects of architecting systems to make o
 
 - **[Retry Service Specific Guidance][RetryServiceSpecificGuidance]** summarizes the retry mechanism features for the majority of Azure services, and includes information to help you use, adapt, or extend the retry mechanism for that service.
 
-- **[Retry Policies][RetryPolicies]** provides details on how to configure different retry policies.
-
 - **[Scalability Checklist][ScalabilityChecklist]** summarizes best practices for designing and implementing scalable services and handling data management.
 
 - **[Availability Checklist][AvailabilityChecklist]** lists best practices for ensuring availability in an Azure application.
