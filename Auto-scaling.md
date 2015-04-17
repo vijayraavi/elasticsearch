@@ -1,3 +1,5 @@
+![](figures/pnp-logo.png)
+
 # Autoscaling guidance
 
 # Overview
