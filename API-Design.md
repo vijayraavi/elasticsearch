@@ -1,3 +1,5 @@
+![](figures/pnp-logo.png)
+
 # API design guidance
 ## Overview
 Many modern web-based solutions make the use of web services, hosted by web servers, to provide functionality for remote client applications. The operations that a web service exposes constitute a web API. The purpose of this guidance is to describe the issues that you should consider when designing a web API.
