@@ -1,3 +1,5 @@
+![](figures/pnp-logo.png)
+
 # Content Delivery Network (CDN) guidance
 
 # Overview #
