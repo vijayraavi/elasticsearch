@@ -1,4 +1,6 @@
-﻿# Retry general guidance
+![](figures/pnp-logo.png)
+
+# Retry general guidance
 
 # Overview 
 
