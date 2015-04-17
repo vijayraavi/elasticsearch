@@ -1,6 +1,6 @@
 ![](figures/pnp-logo.png)
 
-﻿# Caching guidance
+# Caching guidance
 
 Caching is a common technique that aims to improve the performance and 
 scalability of a system by temporarily copying frequently accessed data 
