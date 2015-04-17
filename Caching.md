@@ -1,3 +1,5 @@
+![](figures/pnp-logo.png)
+
 ﻿# Caching guidance
 
 Caching is a common technique that aims to improve the performance and 
