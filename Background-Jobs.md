@@ -90,7 +90,7 @@ Azure WebJobs have the following characteristics:
 
 ### Considerations
 - By default, WebJobs scale with the website. However, jobs can be configured to run on single instance by setting the **is_singleton** configuration property to true. Single instance WebJobs are useful for tasks that you do not want to scale or run as simultaneous multiple instances, such as re-indexing, data analysis, and similar tasks.
-- To minimize the impact of jobs on the performance of the website, consider creating an empty Azure Web Sites instance in a new Web Hosting Plan to host WebJobs that may be long running or resource intensive.
+- To minimize the impact of jobs on the performance of the website, consider creating an empty Azure Web Sites instance in a new App Service Plan to host WebJobs that may be long running or resource intensive.
 
 ### More information
 - [Azure WebJobs Recommended Resources](http://azure.microsoft.com/en-us/documentation/articles/websites-webjobs-resources/) lists the many useful resources, downloads, and samples for WebJobs. 
