@@ -1,4 +1,6 @@
-﻿# Data partitioning guidance
+![](figures/pnp-logo.png)
+
+# Data partitioning guidance
 
 # Overview
 In many large-scale solutions, data is divided into separate partitions that can be managed and accessed separately. The partitioning strategy must be chosen carefully to maximize the benefits while minimizing adverse effects. Partitioning can help to improve scalability, reduce contention, and optimize performance. A side-benefit of partitioning is that can also provide a mechanism for dividing data by the pattern of use; you could archive older, more inactive (cold) data to cheaper data storage.
