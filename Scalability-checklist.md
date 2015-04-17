@@ -1,4 +1,6 @@
-﻿# Scalability checklist
+![](figures/pnp-logo.png)
+
+# Scalability checklist
 
 # Service design
 - **Partition the workload**. Design parts of the process to be discrete and decomposable, and minimize the size of each part while following the typical rules for separation of concerns and the single responsibility principle. This allows the component parts to be distributed in a way that maximizes use of each compute unit (such as a role or database server) and makes it easier to scale the application by adding additional instances of specific resources. For more information, see [Compute Partitioning Guidance](https://msdn.microsoft.com/en-us/library/dn568099.aspx).
