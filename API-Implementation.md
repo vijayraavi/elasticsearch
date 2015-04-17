@@ -1,3 +1,5 @@
+![](figures/pnp-logo.png)
+
 # API implementation guidance
 
 `We're having discussion around some of the implementation. We welcome your feedback! `
