@@ -8,6 +8,13 @@ Designing and implementing applications for the cloud brings a unique set of cha
 
 These documents focus on the essential aspects of architecting systems to make optimal use of Azure, and summarize best practice for building cloud solutions. The current set of guidance documents contains the following items:
 
+----------
+
+**Note** This is a living project. We will be adding more documentation to cover additional aspects of Azure architecture. We also welcome feedback, suggestions, and other contributions to those items that we have already documented.
+
+----------
+
+
 - **[API Design][APIDesign]** describes the issues that you should consider when designing a web API..
 
 - **[API Implementation][APIImplementation]** focusses on best practices for implementing a web API and publishing it to make it available to client applications.
@@ -32,7 +39,6 @@ These documents focus on the essential aspects of architecting systems to make o
 
 - **[Availability Checklist][AvailabilityChecklist]** lists best practices for ensuring availability in an Azure application.
 
-This is a *living* project. We will be adding more documentation to cover additional aspects of Azure architecture. We also welcome feedback, suggestions, and other contributions to those items that we have already documented.
 
 ----------
 
