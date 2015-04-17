@@ -1,4 +1,6 @@
-﻿# Retry service specific guidance
+![](figures/pnp-logo.png)
+
+# Retry service specific guidance
 
 # Overview 
 
