@@ -27,7 +27,7 @@ In a service implemented by using the ASP.NET Web API, each request is routed to
 	);
 	```
 
-	Routes can be generic, comprising literals such as _api_ and variables such as _{controller}_ and _{id}_. Convention-based routing allows some elements of the route to be optional. The Web API framework determines which method to invoke in the controller by matching the HTTP verb in the request to the initial part of the method name, and then by matching any optional parameters. For example, if a controller named orders contains the methods _GetAllOrders()_ or _GetOrderByInt(int id)_ then the GET request _http://www.adventure-works.com/api/orders/_ will be directed to the method _GetAlllOrders()_ and the GET request _http://www.adventure-works.com/api/orders/99_ will be routed to the method _GetOrderByInt(int id)_. If there is no matching method available that begins with the prefix Get in the controller, the Web API framework replies with an HTTP 405 (Method Not Allowed) message. Additionally, name of the parameter (id) specified in the routing table must be the same as the name of the parameter for the _GetOrderById_ method, otherwise the Web API framework will reply with an HTTP 404 (Not Found) response.
+	Routes can be generic, comprising literals such as _api_ and variables such as _{controller}_ and _{id}_. Convention-based routing allows some elements of the route to be optional. The Web API framework determines which method to invoke in the controller by matching the HTTP method in the request to the initial part of the method name in the API, and then by matching any optional parameters. For example, if a controller named _orders_ contains the methods _GetAllOrders()_ or _GetOrderByInt(int id)_ then the GET request _http://www.adventure-works.com/api/orders/_ will be directed to the method _GetAlllOrders()_ and the GET request _http://www.adventure-works.com/api/orders/99_ will be routed to the method _GetOrderByInt(int id)_. If there is no matching method available that begins with the prefix Get in the controller, the Web API framework replies with an HTTP 405 (Method Not Allowed) message. Additionally, name of the parameter (id) specified in the routing table must be the same as the name of the parameter for the _GetOrderById_ method, otherwise the Web API framework will reply with an HTTP 404 (Not Found) response.
 
 	The same rules apply to POST, PUT, and DELETE HTTP requests; a PUT request that updates the details of order 101 would be directed to the URI _http://www.adventure-works.com/api/orders/101_, the body of the message will contain the new details of the order, and this information will be passed as a parameter to a method in the orders controller with a name that starts with the prefix _Put_, such as _PutOrder_.
 
@@ -160,15 +160,16 @@ The code that implements these requests must not impose any side-effects. The sa
 
 > **Note**: The article [Idempotency Patterns](http://blog.jonathanoliver.com/idempotency-patterns/) on Jonathan Oliver’s blog provides an overview of idempotency and how it relates to data management operations.
 
-- **POST actions should create new resources without additional side-effects**.
+- **POST actions that create new resources should do so without unrelated side-effects**.
 
-	A POST request is intended to create a new resource, and the effects of the request should be limited to creating the new resource only. The request should not modify other resources or have any other side-effects on the overall state of the system.
+	If a POST request is intended to create a new resource, the effects of the request should be limited to the new resource (and possibly any directly related resources if there is some sort of linkage involved, such as permissions or a master/detail relationship). In this case, the request should not modify unrelated resources or have any other side-effects on the overall state of the system.
 
-- **Implement batch operations to avoid chattiness**.
+- **Avoid implementing chatty POST, PUT, and DELETE operations**.
 
-	Support POST, PUT and DELETE requests over resource collections. A POST request can contain the details for multiple new resources and add them all to the collection, a PUT request can replace the entire set of resources in a collection, and a DELETE request can remove an entire collection.
+	Support POST, PUT and DELETE requests over resource collections. A POST request can contain the details for multiple new resources and add them all to the same collection, a PUT request can replace the entire set of resources in a collection, and a DELETE request can remove an entire collection.
 
 	Note that the OData support included in ASP.NET Web API 2 provides the ability to batch requests. A client application can package up several web API requests and send them to the server in a single HTTP request, and receive a single HTTP response that contains the replies to each request. For more information, see the page [Introducing Batch Support in Web API and Web API OData](http://blogs.msdn.com/b/webdev/archive/2013/11/01/introducing-batch-support-in-web-api-and-web-api-odata.aspx) on the Microsoft website.
+
 - **Abide by the HTTP protocol when sending a response back to a client application**.
 
 	A web API must return messages that contain the correct HTTP status code to enable the client to determine how to handle the result, the appropriate HTTP headers so that the client understands the nature of the result, and a suitably formatted body to enable the client to parse the result. If you are using the ASP.NET Web API template, the default strategy for implementing methods that respond to HTTP POST requests is simply to return a copy of the newly created resource, as illustrated by the following example:
@@ -192,7 +193,7 @@ The code that implements these requests must not impose any side-effects. The sa
 	}
 	```
 
-	If the POST operation is successful, the Web API framework creates an HTTP response with status code 200 (OK) and the details of the customer as the message body. However, according to the HTTP protocol, a POST operation should return status code 201 (Created) and the response message should include the URI of the newly created resource in the Location header of the response message.
+	If the POST operation is successful, the Web API framework creates an HTTP response with status code 200 (OK) and the details of the customer as the message body. However, in this case, according to the HTTP protocol, a POST operation should return status code 201 (Created) and the response message should include the URI of the newly created resource in the Location header of the response message.
 
 	To provide these features, return your own HTTP response message by using an _HttpResponseMessage_ object. This approach gives you fine control over the HTTP status code, the headers in the response message, and even the format of the data in the response message body, as shown in the following code example. This version of the _CreateNewCustomer_ method conforms more closely to the expectations of client following the HTTP protocol:
 
@@ -396,7 +397,7 @@ In a distributed environment such as that involving a web server and client appl
 
 - **Support client-side caching**.
 
-	The HTTP 1.1 protocol supports client-side caching through the use of the Cache-Control header. When a client application sends an HTTP GET request to the web API, the response can include a Cache-Control header that indicates whether the data in the body of the response can be safely cached by the client, and for how long before it should expire and be considered out-of-date. The following example shows an HTTP GET request and the corresponding response that includes a Cache-Control header:
+	The HTTP 1.1 protocol supports caching in clients and intermediate servers through wich a request is routed by the use of the Cache-Control header. When a client application sends an HTTP GET request to the web API, the response can include a Cache-Control header that indicates whether the data in the body of the response can be safely cached by the client or intermediate server, and for how long before it should expire and be considered out-of-date. The following example shows an HTTP GET request and the corresponding response that includes a Cache-Control header:
 
 	```HTTP
 	GET http://adventure-works.com/orders/2 HTTP/1.1
@@ -412,7 +413,7 @@ In a distributed environment such as that involving a web server and client appl
 	{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}
 	```
 
-	In this example, the Cache-Control header specifies that the data returned should be expired after 600 seconds, and is only suitable for a single client and must not be stored in a shared cache used by other clients (it is _private_). The Cache-Control header could specify _public_ rather than _private_ in which case the data can be stored in a shared cache, or it could specify no-cache in which case the data should not be cached. The following code example shows how to construct a Cache-Control header in a response message:
+	In this example, the Cache-Control header specifies that the data returned should be expired after 600 seconds, and is only suitable for a single client and must not be stored in a shared cache used by other clients (it is _private_). The Cache-Control header could specify _public_ rather than _private_ in which case the data can be stored in a shared cache, or it could specify _no-store_ in which case the data must not be cached by the client. The following code example shows how to construct a Cache-Control header in a response message:
 
 	```C#
 	public class OrdersController : ApiController
@@ -435,8 +436,9 @@ In a distributed environment such as that involving a web server and client appl
     	...
 	}
 	```
-
-	Cache management is the responsibility of the client application, but if properly implemented it can save bandwidth and improve performance by removing the need to fetch data that has already been recently retrieved.
+	> **Note**: The HTTP protocol also defines the _no-cache_ directive for the Cache-Control header. Rather confusingly, this directive does not mean "do not cache" but rather "revalidate the cached information with the server before returning it"; the data can still be cached, but it is checked each time it is used to ensure that it is still current.
+	
+	Cache management is the responsibility of the client application or intermediate server, but if properly implemented it can save bandwidth and improve performance by removing the need to fetch data that has already been recently retrieved.
 
 	The _max-age_ value in the Cache-Control header is only a guide and not a guarantee that the corresponding data won't change during the specified time. The web API should set the max-age to a suitable value depending on the expected volatility of the data. When this period expires, the client should discard the object from the cache.
 
@@ -506,7 +508,7 @@ In a distributed environment such as that involving a web server and client appl
 
 	f. The client uses the status code to maintain the cache. If the data has not changed (status code 304) then the object can remain cached and the client application should continue to use this version of the object. If the data has changed (status code 200) then the cached object should be discarded and the new one inserted. If the data is no longer available (status code 404) then the object should be removed from the cache.
 
-	> **Note**: If the response header contains the Cache-Control header no-cache then the object should always be removed from the cache regardless of the HTTP status code.
+	> **Note**: If the response header contains the Cache-Control header no-store then the object should always be removed from the cache regardless of the HTTP status code.
 
 	The code below shows the _FindOrderByID_ method extended to support the If-None-Match header. Notice that if the If-None-Match header is omitted, the specified order is always retrieved:
 
@@ -582,7 +584,7 @@ In a distributed environment such as that involving a web server and client appl
 
 	e. If the resource to be updated no longer exists then the web API should return an HTTP response with the status code of 404 (Not Found).
 
-	f. The client uses the status code and response headers to maintain the cache. If the data has been updated changed (status code 204) then the object can remain cached (as long as the Cache-Control header does not specify no-cache) but the ETag should be updated. If the data was changed by another user changed (status code 412) or not found (status code 404) then the cached object should be discarded.
+	f. The client uses the status code and response headers to maintain the cache. If the data has been updated changed (status code 204) then the object can remain cached (as long as the Cache-Control header does not specify no-store) but the ETag should be updated. If the data was changed by another user changed (status code 412) or not found (status code 404) then the cached object should be discarded.
 
 	The next code example shows an implementation of the PUT operation for the Orders controller:
 
@@ -946,17 +948,20 @@ A web API should be tested as thoroughly as any other piece of software. You sho
 
 The nature of a web API brings its own additional requirements to verify that it operates correctly. You should pay particular attention to the following aspects:
 
-- Test all routes to verify that they invoke the correct operations. Be especially aware of HTTP status code 405 (Method Not Allowed) being returned unexpectedly as this can indicate a mismatch between a route and the HTTP verbs (GET, POST, PUT, DELETE) that can be dispatched to that route.
+- Test all routes to verify that they invoke the correct operations. Be especially aware of HTTP status code 405 (Method Not Allowed) being returned unexpectedly as this can indicate a mismatch between a route and the HTTP methods (GET, POST, PUT, DELETE) that can be dispatched to that route.
 
 	Send HTTP requests to routes that do not support them, such as submitting a POST request to a specific resource (POST requests should only be sent to resource collections). In these cases, the only valid response _should_ be status code 405 (Not Allowed).
+
 - Verify that all routes are protected properly and are subject to the appropriate authentication and authorization checks.
 
 	> **Note**: Some aspects of security such as user authentication are most likely to be the responsibility of the host environment rather than the web API, but it is still necessary to include security tests as part of the deployment process.
+	
 - Test the exception handling performed by each operation and verify that an appropriate and meaningful HTTP response is passed back to the client application.
 - Verify that request and response messages are well-formed. For example, if an HTTP POST request contains the data for a new resource in x-www-form-urlencoded format, confirm that the corresponding operation correctly parses the data, creates the resources, and returns a response containing the details of the new resource, including the correct Location header.
 - Verify all links and URIs in response messages. For example, an HTTP POST message should return the URI of the newly-created resource. All HATEOAS links should be valid.
 
 	> **Important**: If you publish the web API through an API Management Service, then these URIs should reflect the URL of the management service and not that of the web server hosting the web API.
+	
 - Ensure that each operation returns the correct status codes for different combinations of input. For example:
 	- If a query is successful, it should return status code 200 (OK)
 	- If a resource is not found, the operation should returs HTTP status code 404 (Not Found).
