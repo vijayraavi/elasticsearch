@@ -65,6 +65,7 @@ As with health monitoring, the raw data required to support availability monitor
 
 All timeouts and network connectivity failures, and connection retry attempts must be recorded. All data should be time-stamped.
 
+<a name="analyzing-availablity-data"></a>
 ### Analyzing availability data
 The instrumentation data must be aggregated and correlated to support the following types of analysis:
 
@@ -79,7 +80,7 @@ You can calculate the percentage availability of a service over a period of time
 %Availability =  ((Total Time – Total Downtime) / Total Time ) * 100
 ```
 
-This is useful for SLA purposes ([SLA monitoring](#insertlink#) is described in more detail later in this guidance). The definition of _Downtime_ depends on the service. For example, Visual Studio Online defines downtime as the period during which a customer's attempts to connect to the service take longer than 120 seconds and all basic read and write operations fail after the connection is established within that period.
+This is useful for SLA purposes ([SLA monitoring](#SLA-monitoring) is described in more detail later in this guidance). The definition of _Downtime_ depends on the service. For example, Visual Studio Online defines downtime as the period during which a customer's attempts to connect to the service take longer than 120 seconds and all basic read and write operations fail after the connection is established within that period.
 
 ## Performance monitoring
 As the system is placed under more and more stress as the volume of users increase and the size of the datasets that these users access grows, the possible failure of one or more components becomes likely. Frequently, component failure is preceded by a decrease in performance. If you are able detect such a decrease you can take proactive steps to remedy the situation.
@@ -167,6 +168,7 @@ In all cases the data gathered must enable an administrator to determine the nat
 ### Analyzing security data
 A feature of security monitoring is the variety of sources from which the data arises. The different formats and level of detail often require complex analysis of the data captured to tie it together into a coherent thread of information. Apart from the simplest of cases (such as detecting a large number of failed logins, or repeated attempts to gain unauthorized access to critical resources), it might not be possible to perform any complex automated processing of the security data, and instead it may be preferable to write this data, time-stamped but otherwise in its original form, to a secure repository to allow for expert manual analysis.
 
+<a name="SLA-monitoring"></a>
 ## SLA monitoring
 Many commercial systems that support paying customers make guarantees about the performance of the system in the form of SLAs. Essentially, SLAs state that the system can handle a defined volume of work within an agreed timeframe and without losing critical information. SLA monitoring is concerned with ensuring that the system can meet measurable SLAs.
 
@@ -178,7 +180,7 @@ SLAs are frequently defined in terms of:
 - Operational throughput. This aspect is often expressed as one or more key high-water marks, such as guaranteeing that the system will be able to support up to 100,000 concurrent user requests or handle 10,000 concurrent business transactions.
 - Operational response time. The system may also make guarantees concerning the rate at which requests are processed, such as 99% of all business transactions will complete within 2 seconds, and no single transaction will take longer than 10 seconds.
 
-> **Note**: Some contracts for commercial systems might also include SLAs concerning customer support, such as all help desk requests will elicit a response within 5 minutes, and that 99% of all problems should be fully addressed within 1 working day. Effective [issue tracking](#insertlink#) (described later in this section) is key to meeting SLAs such as these.
+> **Note**: Some contracts for commercial systems might also include SLAs concerning customer support, such as all help desk requests will elicit a response within 5 minutes, and that 99% of all problems should be fully addressed within 1 working day. Effective [issue tracking](#issue-tracking) (described later in this section) is key to meeting SLAs such as these.
 
 ### Requirements for SLA monitoring
 At the highest level, an operator should be able to determine at a glance whether the system is meeting the agreed SLAs or not, and if not then to drill down and examine the underlying factors to determine the reasons for substandard performance.
@@ -218,7 +220,7 @@ The instrumentation data must be aggregated to generate a picture of the overall
 - Determine the overall availability of the system as a percentage uptime for any specific period.
 - Analyze the percentage time availability of each of the individual components and services in the system. This may involve parsing logs generating by third-party services.
 
-Many commercial systems are required to report real performance figures against agreed SLAs for a specified period, typically a month. This information can be used to calculate credits or other forms of repayments for customers if the SLAs are not met during that period. You can calculate availability for a service by using the technique described in the section [Analyzing Availability Data](#insertlink#).
+Many commercial systems are required to report real performance figures against agreed SLAs for a specified period, typically a month. This information can be used to calculate credits or other forms of repayments for customers if the SLAs are not met during that period. You can calculate availability for a service by using the technique described in the section [Analyzing Availability Data](#analyzing-availability-data).
 
 For internal purposes, an organization might also track the number and nature of incidents that caused services to fail. Learning how to resolve these issues quickly, or eliminate them completely, will help to reduce downtime and meet SLAs.
 
@@ -270,6 +272,7 @@ Usage tracking can be performed at a relatively high level, noting the start and
 
 For metering purposes, you also need to be able to identity which users are responsible for performing which operations and the resources that these operations utilize. The information gathered should be detailed enough to enable accurate billing.
 
+<a name="issue-tracking"></a>
 ## Issue tracking
 Customers and other users may report issues if unexpected events or behavior occurs in the system. Issue tracking is concerned with managing these issues, associating them with efforts to resolve any underlying problems in the system, and informing customers of possible resolutions.
 
@@ -334,7 +337,7 @@ As the components of a system are modified and new versions deployed, it is impo
 
 Security issues might occur at any point in the system. For example, a user might attempt to log in with an invalid user ID or password; an authenticated user might try and obtain unauthorized access to a resource; or a user might provide an invalid or outdated key to access encrypted information. Security-related information for successful and failing requests should always be logged.
 
-The section [Instrumenting an Application](#insertlink#) contains further guidance on the information that you should capture, but there are a variety of strategies that you can use to gather this information in the first place:
+The section [Instrumenting an Application](#instrumenting-an-application) contains further guidance on the information that you should capture, but there are a variety of strategies that you can use to gather this information in the first place:
 
 - **Application/System Monitoring**. This strategy uses internal sources within the application, the application frameworks, operating system, and infrastructure. The application code itself can generate its own monitoring data at notable points during the lifecycle of a client request. The application can include tracing statements which may be selectively enabled or disabled as circumstances dictate. It may also be possible to inject diagnostics dynamically by using a diagnostics framework. These frameworks typically provide plugins that can attach to various instrumentation points in your code and capture trace data at these points.
 
@@ -354,6 +357,7 @@ Additionally, your code and/or the underlying infrastructure may raise events at
 
 For maximum coverage, you should use these techniques in combination with each other.
 
+<a name="instrumenting-an-application"></a>
 ## Instrumenting an application
 Instrumentation is a critical part of the monitoring process; you can only make meaningful decisions about the performance and health of a system if you capture the data that enables you to make these decisions in the first place. The information that you gather by using instrumentation should be sufficient to enable you to assess performance, diagnose problems and make decisions without necessitating that you have to log in to a remote production server to perform tracing (and debugging) manually.
 
@@ -365,6 +369,7 @@ The instrumentation data will typically comprise information written to trace lo
 
 - Metrics will generally simply be a measure or count of some aspect or resource in the system at a specific time with one or more associated tags or dimensions (sometimes referred to as a _sample_). A single instance of a metric is usually not useful in isolation; instead metrics have to be captured over time. The key issue to consider is which metrics should you record and how frequently. Generating data for metrics too often can impose a significant additional load on the system, whereas capturing metrics infrequently may cause you to miss the circumstances leading to a significant event. The considerations will vary from metric to metric. For example, CPU utilization on a server may vary significantly from second to second, but high utilization only becomes an issue if it is long-lived over a number of minutes. 
 
+<a name="information-for-correlating-data"></a>
 ### Information for correlating data
 You can easily monitor individual system-level performance counters, capture metrics for resources, and obtain application trace information from various log files, but some forms of monitoring require the analysis and diagnostics stage in the monitoring pipeline to correlate the data retrieved from several sources. This data may take several forms in the raw data, and the analysis process must be provided with sufficient instrumentation data to be able to map these different forms. For example, at the application framework level, a task might be identified by a thread ID but within an application the same work might be associated with the user ID for the user performing that task. Furthermore, there is unlikely to be a 1:1 mapping between threads and user requests as asynchronous operations may reuse the same threads to perform operations on behalf of more than one user.  To complicate matters further, a single request may be handled by more than one thread as execution flows through the system. If possible, associate each request with a unique activity ID that is propagated through the system as part of the request context (the technique for generating and including activity IDs in trace information will be dependent on the technology being used to capture the trace data).
 
@@ -417,7 +422,7 @@ Data collection is often performed by implementing a collection service which ca
 _Figure 2. 
 Collecting instrumentation data_
 
-Note that this is a simplified view. The collection service is not necessarily a single process and may comprise many constituent parts running on different machines, as described in the following sections. Additionally, if the analysis of some telemetry data needs to be performed quickly (hot analysis, as described in the section [Supporting Hot, Warm, and Cold Analysis](#insertlink#) later in this document), local components operating outside of the collection service might perform the analysis tasks immediately. Figure 2 depicts this situation for selected events; after analytical processing the results can be sent directly to the visualization and alerting subsystem. Data subjected to warm or cold analysis is held in storage while it awaits processing.
+Note that this is a simplified view. The collection service is not necessarily a single process and may comprise many constituent parts running on different machines, as described in the following sections. Additionally, if the analysis of some telemetry data needs to be performed quickly (hot analysis, as described in the section [Supporting Hot, Warm, and Cold Analysis](#supporting-hot-warm-and-cold-analysis) later in this document), local components operating outside of the collection service might perform the analysis tasks immediately. Figure 2 depicts this situation for selected events; after analytical processing the results can be sent directly to the visualization and alerting subsystem. Data subjected to warm or cold analysis is held in storage while it awaits processing.
 
 For Azure applications and services, Windows Azure Diagnostics (WAD) provides one possible solution for capturing data. WAD gathers data from the following sources for each compute node, aggregates it together, and then uploads it to Azure storage:
 
@@ -464,6 +469,7 @@ The local data collection service can add data to a queue immediately it is rece
 
 For scalability, you could run multiple instances of the storage writing service. If there is a high volume of events, you could use an event hub to dispatch the data to different compute resources for processing and storage.
 
+<a name="consolidating-instrumentation-data"></a>
 #### _Consolidating instrumentation data_
 The instrumentation data retrieved by the data collection service from a single instance of an application gives a localized view of the health and performance of that instance. To assess the overall health of the system, it is necessary to consolidate some aspects of the data in the local views together. This can be performed after the data has been stored, but in some cases it could also be achieved as the data is collected. Rather than being written directly to shared storage, the instrumentation data could pass through a separate data consolidation service which combines data and acts as a filter and cleanup process. For example, instrumentation data that includes the same correlation information such as an activity ID can be amalgamated (it is possible that a user starts performing a business operation on one node, and then gets transferred to another node in the event of node failure or depending on how load-balancing is configured). This process can also detect and remove any duplicated data (always a possibility if the telemetry service uses message queues to push instrumentation data out to storage). Figure 5 illustrates an example of this structure.
 
@@ -484,7 +490,7 @@ The same instrumentation data might be required for more than one purpose. For e
 
 You should also consider how urgently the data is required. Data that provides information for alerting needs to be accessed quickly, and so should be held in fast data storage and indexed or structured to optimize the queries that the alerting system performs. In some cases, it may be necessary for the telemetry service that gathers the data on each node to format and save data locally so that a local instance of the alerting system can quickly notify of any issues. The same data can be dispatched to the storage writing service shown in the previous diagrams and stored centrally if it is also required for other purposes.
 
-Information that is used for more considered analysis, for reporting, and for spotting historical trends is less urgent and can be stored in a manner that supports data mining and ad-hoc queries. For more information, see the section [Supporting Hot, Warm, and Cold Analysis](#insertlink#) later in this document.
+Information that is used for more considered analysis, for reporting, and for spotting historical trends is less urgent and can be stored in a manner that supports data mining and ad-hoc queries. For more information, see the section [Supporting Hot, Warm, and Cold Analysis](#supporting-hot-warm-and-cold-analysis) later in this document.
 
 #### _Log rotation and data retention_
 Instrumentation can generate considerable volumes of data. This data can be held in several places, starting with the raw log files, trace files, and other information captured at each node to the consolidated, cleaned, and partitioned view of this data held in shared storage. In some cases, once the data has been processed and transferred the original raw source data can be removed from each node. In other cases, it may be necessary or simply useful to save the raw information. For example, data generated for debugging purposes may be best left available in its raw form but can then be discarded quite quickly once any bugs have been rectified. Performance data often has a longer life to enable it to be used to spot performance trends and for capacity planning. The consolidated view of this data is usually kept on-line for a finite period to enable fast access, after which it might be archived or discarded. Data gathered for metering and billing customers may need to be saved indefinitely. Additionally, regulatory requirements might dictate that information collected for auditing and security purposes will also need to be archived and saved. This data is also sensitive and may need to be encrypted or otherwise protected to prevent tampering. You should never record information such as users' passwords or other information that could be used to commit identity fraud; such details should be scrubbed from the data before it is stored.
@@ -503,8 +509,9 @@ The following list summarizes best practices for capturing and storing logging i
 ## Analyzing data and diagnosing issues
 An important part of the monitoring and diagnostics process is analyzing the data gathered to obtain a picture of the overall wellbeing of the system. You should have defined your own KPIs and performance metrics, and it is important to understand how you can structure the data that has been gathered to meet your analysis requirements. It is also important to understand how the data captured in different metrics and log files is correlated, as this information can be key to tracking a sequence of events and help diagnose problems that arise.
 
-As described in the section [Consolidating Instrumentation Data](#insertlink#), the data for each part of the system is typically captured locally, but generally needs to be combined with data generated at other sites that participate in the system. This information requires careful correlation to ensure that data is combined accurately. For example, the usage data for an operation may span a node hosting a web site to which a user connects, a node running a separate service accessed as part of this operation, and data storage held on a further node. This information needs to be tied together to provide an overall view of the resource and processing usage for the operation. Some pre-processing and filtering of data might occur on the node on which the data is captured, while aggregation and formatting is more likely to occur on a central node.
+As described in the section [Consolidating Instrumentation Data](#consolidating-instrumentation-data), the data for each part of the system is typically captured locally, but generally needs to be combined with data generated at other sites that participate in the system. This information requires careful correlation to ensure that data is combined accurately. For example, the usage data for an operation may span a node hosting a web site to which a user connects, a node running a separate service accessed as part of this operation, and data storage held on a further node. This information needs to be tied together to provide an overall view of the resource and processing usage for the operation. Some pre-processing and filtering of data might occur on the node on which the data is captured, while aggregation and formatting is more likely to occur on a central node.
 
+<a name="supporting-hot-warm-and-cold-analysis"></a>
 ### Supporting hot, warm, and cold analysis
 Analyzing and reformatting data for visualization, reporting, and alerting purposes can be a complex process that consumes its own set of resources. Some forms of monitoring are time critical and require immediate analysis of data to be effective. This is known as _hot analysis_. Examples include the analyses required for alerting and some aspects of security monitoring (such as detecting an attack on the system). Data required for these purposes must be quickly available and structured for efficient processing; it some cases it may be necessary to move the analysis processing to the individual nodes on which the data is held.
 
@@ -515,7 +522,7 @@ Some types of monitoring generate more long-term data, and the analysis can be p
 ### Correlating data
 The data captured by instrumentation can provide a snapshot of the system state, but the purpose of analysis is to make this data actionable. For example, what has caused an intense I/O loading at the system level at a specific time? Is it the result of a large number of database operations? Is this reflected in the database response times, the number of transactions per second, and application response times at the same juncture? If so, then one remedial action that may reduce the load could be to shard the data over more servers. In addition, exceptions can arise as a result of a fault in any level of the system, and an exception in one level often triggers another fault in the level above. For these reasons you need to be able to correlate the different types of monitoring data at each level to produce an overall view of the state of the system and the applications that are executing on it. You can then use this information to make decisions about whether the system is functioning acceptably or not, and determine what can be done to improve the quality of the system.
 
-As described in the section [Information for Correlating Data](#insertlink#), you must ensure that the raw instrumentation data includes sufficient context and activity ID information to support the required aggregations for correlating events. Additionally, this data might be held in different formats, and it may be necessary to parse this information to convert it into a standardized format for analysis purposes.
+As described in the section [Information for Correlating Data](#information-for-correlating-data), you must ensure that the raw instrumentation data includes sufficient context and activity ID information to support the required aggregations for correlating events. Additionally, this data might be held in different formats, and it may be necessary to parse this information to convert it into a standardized format for analysis purposes.
 
 ### Troubleshooting and diagnosing issues
 Diagnosis requires being able to determine the cause of faults or unexpected behavior, including performing root cause analysis. The information required typically includes:
