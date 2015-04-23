@@ -391,6 +391,7 @@ The following code shows an example that traps different conditions and returns 
 
 	The HTTP protocol distinguishes between errors that occur due to the client application (the HTTP 4xx status codes), and errors that are caused by a mishap on the server (the HTTP 5xx status codes). Make sure that you respect this convention in any error response messages.
 
+<a name="considerations-for-optimizing"></a>
 ## Considerations for optimizing client-side data access
 
 In a distributed environment such as that involving a web server and client applications, one of the primary sources of concern is the network. This can act as a considerable bottleneck, especially if a client application is frequently sending requests or receiving data. Therefore you should aim to minimize the amount of traffic that flows across the network. Consider the following points when you implement the code to retrieve and maintain data:
@@ -645,6 +646,7 @@ In a distributed environment such as that involving a web server and client appl
 
 	> **Tip**: Use of the If-Match header is entirely optional, and if it is omitted the web API will always attempt to update the specified order, possibly blindly overwriting an update made by another user. To avoid problems due to lost updates, always provide an If-Match header.
 
+<a name="considerations-for-handling-large"></a>
 ## Considerations for handling large requests and responses
 
 There may be occasions when a client application needs to issue requests that send or receive data that may be several megabytes (or bigger) in size. Waiting while this amount of data is transmitted could cause the client application to become unresponsive. Consider the following points when you need to handle requests that include significant amounts of data:
@@ -795,6 +797,7 @@ There may be occasions when a client application needs to issue requests that se
 
 	If you are using the OData protocol support provided with the ASP.NET Web API you get this functionality built-in. The _$top_ query string parameter allows a client application to limit the number of items returned, while the _$skip_ parameter enables an application to specify an offset into a collection from where to start retrieving items. The URI _/orders?$skip=20&$top=10_ fetches 10 orders starting with the 20th order in the collection.
 
+<a name="considerations-for-maintaining-responsiveness"></a>
 ## Considerations for maintaining responsiveness, scalability, and availability
 
 The same web API might be utilized by many client applications running anywhere in the world. It is important to ensure that the web API is implemented to maintain responsiveness under a heavy load, to be scalable to support a highly varying workload, and to guarantee availability for clients that perform business-critical operations. Consider the following points when determining how to meet these requirements:
@@ -868,6 +871,7 @@ It is useful to be able to decouple these issues from the technical issues conce
 - Transforming messages and translating communications protocols for clients built by using varying technologies.
 - Caching requests and responses to reduce load on the server hosting the web API.
 
+<a name="publishing-a-web-API"></a>
 ## Publishing a web API by using the Azure API Management Service
 
 Azure provides the API Management Service which you can use to publish and manage a web API. Using this facility, you can generate a service that acts a façade for one or more web APIs. The service is itself a scalable web service that you can create and configure by using the Azure Management portal. You can use this service to publish and manage a web API as follows:
@@ -898,7 +902,7 @@ The Azure API Management Service includes a developer portal that describes the 
 
 This portal also provides:
 
-- Documentation for the product, listing the operations that it exposes, the parameters required, and the different responses that can be returned. Note that this information is generated from the details provided in step 3 in the list in the section [Publishing a web API by using the Microsoft Azure API Management Service](#insertlink#).
+- Documentation for the product, listing the operations that it exposes, the parameters required, and the different responses that can be returned. Note that this information is generated from the details provided in step 3 in the list in the section [Publishing a web API by using the Microsoft Azure API Management Service](#publishing-a-web-API).
 - Code snippets that show how to invoke operations from several languages, including JavaScript, C#, Java, Ruby, Python, and PHP.
 - A developers' console that enables a developer to send an HTTP request to test each operation in the product and view the results.
 - A page where the developer can report any issues or problems found.
@@ -972,10 +976,10 @@ Watch out for unexpected response status codes in the 5xx range. These messages 
 
 - Test the different request header combinations that a client application can specify and ensure that the web API returns the expected information in response messages. Examples of client request headers include:
 	- **Accept**. The format of the data in the body of the response should match the format specified by the client request. The Content-Type header of the response should specify the format of the data returned.
-	- **ETag** and **If-None-Match**. If the client application implements client-side caching it can provide these headers to indicate which version of an object it currently has in cache, and how the web API should handle the request. The section [Considerations for Optimizing Client-Side Data Access]() earlier in this guidance describes how these requests should be handled.
-	- **Range**. If an operation supports partial responses (if a request can return a large amount of data, for example), verify that the operation respects any client Range headers and responds with the correct data and the appropriate Accept-Ranges, Content-Length, and Content-Range headers. The section [Considerations for Handling Large Requests and Responses](#insertlink#) in this guidance provides more information on these requests.
+	- **ETag** and **If-None-Match**. If the client application implements client-side caching it can provide these headers to indicate which version of an object it currently has in cache, and how the web API should handle the request. The section [Considerations for Optimizing Client-Side Data Access](#considerations-for-optimizing) earlier in this guidance describes how these requests should be handled.
+	- **Range**. If an operation supports partial responses (if a request can return a large amount of data, for example), verify that the operation respects any client Range headers and responds with the correct data and the appropriate Accept-Ranges, Content-Length, and Content-Range headers. The section [Considerations for Handling Large Requests and Responses](#considerations-for-handling-large) in this guidance provides more information on these requests.
 - Test query strings. If an operation can take optional parameters (such as pagination requests), test the different combinations and order of parameters.
-- Verify that asynchronous operations complete successfully. If the web API supports streaming for requests that return large binary objects (such as video or audio), ensure that client requests are not blocked while the data is streamed. If the web API implements polling for long-running data modification operations, verify that that the operations report their status correctly as they proceed. For more information, see the section [Considerations for Maintaining Responsiveness, Scalability, and Availability](#insertlink#) in this guidance.
+- Verify that asynchronous operations complete successfully. If the web API supports streaming for requests that return large binary objects (such as video or audio), ensure that client requests are not blocked while the data is streamed. If the web API implements polling for long-running data modification operations, verify that that the operations report their status correctly as they proceed. For more information, see the section [Considerations for Maintaining Responsiveness, Scalability, and Availability](#considerations-for-maintaining-responsiveness) in this guidance.
 
 You should also create and run performance tests to check that the web API operates satisfactorily under duress. You can build a web performance and load test project by using Visual Studio Ultimate. For more information, see the page [Run performance tests on an application before a release](https://msdn.microsoft.com/library/dn250793.aspx) on the Microsoft website.
 
