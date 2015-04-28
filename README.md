@@ -2,7 +2,7 @@
 
 [![Join the chat at https://gitter.im/mspnp/azure-guidance](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/mspnp/azure-guidance?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-![](figures/pnp-logo.png)
+![](http://pnp.azurewebsites.net/images/pnp-logo.png)
 
 Designing and implementing applications for the cloud brings a unique set of challenges due to the remoteness of the infrastructure and the very nature of distributed services. Azure provides a comprehensive platform and infrastructure for hosting large-scale web applications and cloud services. However, to be successful, you need to understand how to use the features that Azure provides to support your systems correctly. The purpose of this site is to provide architectural guidance to enable you to build and deploy world-class systems using Azure.
 

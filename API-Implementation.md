@@ -1,4 +1,4 @@
-![](figures/pnp-logo.png)
+![](http://pnp.azurewebsites.net/images/pnp-logo.png)
 
 # API implementation guidance
 
@@ -438,7 +438,7 @@ In a distributed environment such as that involving a web server and client appl
 	}
 	```
 	> **Note**: The HTTP protocol also defines the _no-cache_ directive for the Cache-Control header. Rather confusingly, this directive does not mean "do not cache" but rather "revalidate the cached information with the server before returning it"; the data can still be cached, but it is checked each time it is used to ensure that it is still current.
-	
+
 	Cache management is the responsibility of the client application or intermediate server, but if properly implemented it can save bandwidth and improve performance by removing the need to fetch data that has already been recently retrieved.
 
 	The _max-age_ value in the Cache-Control header is only a guide and not a guarantee that the corresponding data won't change during the specified time. The web API should set the max-age to a suitable value depending on the expected volatility of the data. When this period expires, the client should discard the object from the cache.
@@ -959,13 +959,13 @@ The nature of a web API brings its own additional requirements to verify that it
 - Verify that all routes are protected properly and are subject to the appropriate authentication and authorization checks.
 
 	> **Note**: Some aspects of security such as user authentication are most likely to be the responsibility of the host environment rather than the web API, but it is still necessary to include security tests as part of the deployment process.
-	
+
 - Test the exception handling performed by each operation and verify that an appropriate and meaningful HTTP response is passed back to the client application.
 - Verify that request and response messages are well-formed. For example, if an HTTP POST request contains the data for a new resource in x-www-form-urlencoded format, confirm that the corresponding operation correctly parses the data, creates the resources, and returns a response containing the details of the new resource, including the correct Location header.
 - Verify all links and URIs in response messages. For example, an HTTP POST message should return the URI of the newly-created resource. All HATEOAS links should be valid.
 
 	> **Important**: If you publish the web API through an API Management Service, then these URIs should reflect the URL of the management service and not that of the web server hosting the web API.
-	
+
 - Ensure that each operation returns the correct status codes for different combinations of input. For example:
 	- If a query is successful, it should return status code 200 (OK)
 	- If a resource is not found, the operation should returs HTTP status code 404 (Not Found).
