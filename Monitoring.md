@@ -1,4 +1,4 @@
-![](figures/pnp-logo.png)
+![](http://pnp.azurewebsites.net/images/pnp-logo.png)
 
 # Monitoring and diagnostics guidance
 ## Overview
