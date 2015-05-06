@@ -2,7 +2,7 @@
 
 # API implementation guidance
 
-Some topics in this guidance are under debate and changing in the future. We welcome your feedback! `
+Some topics in this guidance are under debate and changing in the future. We welcome your feedback!
 
 # Overview
 A carefully-designed RESTful web API defines the resources, relationships, and navigation schemes that are accessible to client applications. When you implement and deploy a web API, you should consider the physical requirements of the environment hosting the web API and the way in which the web API is constructed rather than the logical structure of the data. This guidance focusses on best practices for implementing a web API and publishing it to make it available to client applications. Security concerns are described separately in the API Security Guidance document. You can find detailed information about web API design in the API Design Guidance document.
@@ -154,9 +154,9 @@ In a service implemented by using the ASP.NET Web API, each request is routed to
 
 Once a request from a client application has been successfully routed to a method in a web API, the request must be processed in as efficient manner as possible. Consider the following points when you implement the code to handle requests:
 
-**GET, PUT, DELETE, HEAD, and PATCH actions must be idempotent**.
+- **GET, PUT, DELETE, HEAD, and PATCH actions should be idempotent**.
 
-The code that implements these requests must not impose any side-effects. The same request repeated over the same resource must have the same result.
+	The code that implements these requests should not impose any side-effects. The same request repeated over the same resource should have the same result.
 
 > **Note**: The article [Idempotency Patterns](http://blog.jonathanoliver.com/idempotency-patterns/) on Jonathan Oliver’s blog provides an overview of idempotency and how it relates to data management operations.
 
@@ -195,7 +195,7 @@ The code that implements these requests must not impose any side-effects. The sa
 
 	If the POST operation is successful, the Web API framework creates an HTTP response with status code 200 (OK) and the details of the customer as the message body. However, in this case, according to the HTTP protocol, a POST operation should return status code 201 (Created) and the response message should include the URI of the newly created resource in the Location header of the response message.
 
-	To provide these features, return your own HTTP response message by using an _HttpResponseMessage_ object. This approach gives you fine control over the HTTP status code, the headers in the response message, and even the format of the data in the response message body, as shown in the following code example. This version of the _CreateNewCustomer_ method conforms more closely to the expectations of client following the HTTP protocol:
+	To provide these features, return your own HTTP response message by using the _IHttpActionResult_ interface. This approach gives you fine control over the HTTP status code, the headers in the response message, and even the format of the data in the response message body, as shown in the following code example. This version of the _CreateNewCustomer_ method conforms more closely to the expectations of client following the HTTP protocol. The _Created_ method of the _ApiController_ class constructs the response message from the specified data, and adds the Location header to the results:
 
 	```C#
 	public class CustomersController : ApiController
@@ -203,18 +203,19 @@ The code that implements these requests must not impose any side-effects. The sa
 	    ...
 	    [Route("api/customers")]
 	    [HttpPost]
-	    public HttpResponseMessage CreateNewCustomer(Customer customerDetails)
+	    public IHttpActionResult CreateNewCustomer(Customer customerDetails)
 	    {
 	        // Add the new customer to the repository
 	        var newCust = repository.Add(customerDetails);
-	        // Construct the response
-	        var response =
-	            Request.CreateResponse(HttpStatusCode.Created, newCust);
-	        // Add the Location header to the response
+
+	        // Create a value for the Location header to be returned in the response
 	        // The URI should be the location of the customer including its ID,
 	        // such as http://adventure-works.com/api/customers/99
-	        response.Headers.Location = new Uri(...);
-	        return response;
+	        var location = new Uri(...);
+
+            // Return the HTTP 201 response,
+            // including the location and the newly added customer
+	        return Created(location, newCust);
 	    }
 	    ...
 	}
@@ -292,25 +293,25 @@ The code that implements these requests must not impose any side-effects. The sa
 
 	The HTTP GET operation retrieves the customer data from storage and constructs a _Customer_ object, and then populates the _Links_ collection. The result is formatted as a JSON response message. Each link comprises the following fields:
 
-	a. The relationship between the object being returned and the object described by the link. In this case "self" indicates that the link is a reference back to the object itself (similar to a _this_ pointer in many object-oriented languages), and "orders" is the name of a collection containing the related order information.
+	- The relationship between the object being returned and the object described by the link. In this case "self" indicates that the link is a reference back to the object itself (similar to a _this_ pointer in many object-oriented languages), and "orders" is the name of a collection containing the related order information.
 
-	b. The hyperlink (_HRef_) for the object being described by the link in the form of a URI.
+	- The hyperlink (_HRef_) for the object being described by the link in the form of a URI.
 
-	c. The type of HTTP request (_Action_) that can be sent to this URI.
+	- The type of HTTP request (_Action_) that can be sent to this URI.
 
-	d. The format of any data (_LinkedResourceMIMETypes_) that should be provided in the HTTP request or that can be returned in the response, depending on the type of the request.
+	- The format of any data (_LinkedResourceMIMETypes_) that should be provided in the HTTP request or that can be returned in the response, depending on the type of the request.
 
 	The HATEOAS links shown in the example HTTP response indicate that a client application can perform the following operations:
 
-	a. An HTTP GET request to the URI _http://adventure-works.com/customers/2_ to fetch the details of the customer (again). The data can be returned as XML or JSON.
+	- An HTTP GET request to the URI _http://adventure-works.com/customers/2_ to fetch the details of the customer (again). The data can be returned as XML or JSON.
 
-	b. An HTTP PUT request to the URI _http://adventure-works.com/customers/2_ to modify the details of the customer. The new data must be provided in the request message in x-www-form-urlencoded format.
+	- An HTTP PUT request to the URI _http://adventure-works.com/customers/2_ to modify the details of the customer. The new data must be provided in the request message in x-www-form-urlencoded format.
 
-	c. An HTTP DELETE request to the URI _http://adventure-works.com/customers/2_ to delete the customer. The request does not expect any additional information or return data in the response message body.
+	- An HTTP DELETE request to the URI _http://adventure-works.com/customers/2_ to delete the customer. The request does not expect any additional information or return data in the response message body.
 
-	d. An HTTP GET request to the URI _http://adventure-works.com/customers/2/orders_ to find all the orders for the customer. The data can be returned as XML or JSON.
+	- An HTTP GET request to the URI _http://adventure-works.com/customers/2/orders_ to find all the orders for the customer. The data can be returned as XML or JSON.
 
-	e. An HTTP PUT request to the URI _http://adventure-works.com/customers/2/orders_ to create a new order for this customer. The data must be provided in the request message in x-www-form-urlencoded format.
+	- An HTTP PUT request to the URI _http://adventure-works.com/customers/2/orders_ to create a new order for this customer. The data must be provided in the request message in x-www-form-urlencoded format.
 
 ## Considerations for handling exceptions
 By default, in the ASP.NET Web API framework, if an operation throws an uncaught exception the framework returns a response message with HTTP status code 500 (Internal Server Error). In many cases, this simplistic approach is not useful in isolation, and makes determining the cause of the exception difficult. Therefore you should adopt a more comprehensive approach to handling exceptions, considering the following points:
@@ -325,51 +326,45 @@ The following code shows an example that traps different conditions and returns 
 	[Route("customers/{id:int}")]
 	public HttpResponseMessage DeleteCustomer(int id)
 	{
-	    try
-	    {
-	        // Find the customer to be deleted in the repository
-	        var customerToDelete = repository.GetCustomer(id);
-	        // If there is no such customer, return an error response
-	        // with status code 404 (Not Found) and
-	        // the message "Customer not found"
-	        if (customerToDelete == null)
-	        {
-	            return Request.CreateErrorResponse(
-	                HttpStatusCode.NotFound, Strings.CustomerNotFound);
-	        }
-	        // Remove the customer from the repository
-	        // The DeleteCustomer method returns true if the customer
-	        // was successfully deleted
-	        if (repository.DeleteCustomer(id))
-	        {
-	            // Return a response message with status code 204 (No Content)
-	            // To indicate that the operation was successful
-	            return Request.CreateResponse(HttpStatusCode.NoContent);
-	        }
-	        else
-	        {
-	            // Otherwise return an error response with status code
-	            // 400 (Bad Request) and the message "Customer not deleted"
-	            return Request.CreateResponse(
-	                HttpStatusCode.BadRequest, Strings.CustomerNotDeleted);
-	        }
-	    }
-	    catch
-	    {
-	        // If an uncaught exception occurs, return an error response
-	        // with status code 500 (Internal Server Error)
-	        // and a meaningful message
-	        return Request.CreateErrorResponse(
-	            HttpStatusCode.InternalServerError, Strings.ServerError);
-	    }
+		try
+		{
+			// Find the customer to be deleted in the repository
+			var customerToDelete = repository.GetCustomer(id);
+
+			// If there is no such customer, return an error response
+			// with status code 404 (Not Found)
+			if (customerToDelete == null)
+			{
+					return NotFound();
+			}
+
+			// Remove the customer from the repository
+			// The DeleteCustomer method returns true if the customer
+			// was successfully deleted
+			if (repository.DeleteCustomer(id))
+			{
+				// Return a response message with status code 204 (No Content)
+				// To indicate that the operation was successful
+				return StatusCode(HttpStatusCode.NoContent);
+			}
+			else
+			{
+				// Otherwise return a 400 (Bad Request) error response
+				return BadRequest(Strings.CustomerNotDeleted);
+			}
+		}
+		catch
+		{
+			// If an uncaught exception occurs, return an error response
+			// with status code 500 (Internal Server Error)
+			return InternalServerError();
+		}
 	}
 	```
 
-	> **Tip**: Do not include information that could be useful to an attacker attempting to penetrate your web API.
+> **Tip**: Do not include information that could be useful to an attacker attempting to penetrate your web API.For further information, visit the [Exception Handling in ASP.NET Web API](http://www.asp.net/web-api/overview/error-handling/exception-handling) page on the Microsoft website.
 
-	For further information, visit the [Exception Handling in ASP.NET Web API](http://www.asp.net/web-api/overview/error-handling/exception-handling) page on the Microsoft website.
-
-	> **Note**: Many web servers trap error conditions themselves before they reach the web API. For example, if you configure authentication for a web site and the user fails to provide the correct authentication information, the web server should respond with status code 401 (Unauthorized). Once a client has been authenticated, your code can perform its own checks to verify that the client should be able access the requested resource. If this authorization fails, you should return status code 403 (Forbidden).
+> **Note**: Many web servers trap error conditions themselves before they reach the web API. For example, if you configure authentication for a web site and the user fails to provide the correct authentication information, the web server should respond with status code 401 (Unauthorized). Once a client has been authenticated, your code can perform its own checks to verify that the client should be able access the requested resource. If this authorization fails, you should return status code 403 (Forbidden).
 
 - **Handle exceptions in a consistent manner and log information about errors**.
 
@@ -377,13 +372,13 @@ The following code shows an example that traps different conditions and returns 
 
 	However, there are several situations where an exception filter will not catch an exception, including:
 
-	a. Exceptions thrown from controller constructors.
+	- Exceptions thrown from controller constructors.
 
-	b. Exceptions thrown from message handlers.
+	- Exceptions thrown from message handlers.
 
-	c. Exceptions thrown during routing.
+	- Exceptions thrown during routing.
 
-	d. Exceptions thrown while serializing the content for a response message.
+	- Exceptions thrown while serializing the content for a response message.
 
 	To handle these cases, you may need to implement a more customized approach. You should also incorporate error logging which captures the full details of each exception; this error log can contain detailed information as long as it is not made accessible over the web to clients. The article [Web API Global Error Handling](http://www.asp.net/web-api/overview/error-handling/web-api-global-error-handling) on the Microsoft website shows one way of performing this task.
 
@@ -398,7 +393,7 @@ In a distributed environment such as that involving a web server and client appl
 
 - **Support client-side caching**.
 
-	The HTTP 1.1 protocol supports caching in clients and intermediate servers through wich a request is routed by the use of the Cache-Control header. When a client application sends an HTTP GET request to the web API, the response can include a Cache-Control header that indicates whether the data in the body of the response can be safely cached by the client or intermediate server, and for how long before it should expire and be considered out-of-date. The following example shows an HTTP GET request and the corresponding response that includes a Cache-Control header:
+	The HTTP 1.1 protocol supports caching in clients and intermediate servers through wich a request is routed by the use of the Cache-Control header. When a client application sends an HTTP GET request to the web API, the response can include a Cache-Control header that indicates whether the data in the body of the response can be safely cached by the client or an intermediate server through which the request has been routed, and for how long before it should expire and be considered out-of-date. The following example shows an HTTP GET request and the corresponding response that includes a Cache-Control header:
 
 	```HTTP
 	GET http://adventure-works.com/orders/2 HTTP/1.1
@@ -414,7 +409,7 @@ In a distributed environment such as that involving a web server and client appl
 	{"OrderID":2,"ProductID":4,"Quantity":2,"OrderValue":10.00}
 	```
 
-	In this example, the Cache-Control header specifies that the data returned should be expired after 600 seconds, and is only suitable for a single client and must not be stored in a shared cache used by other clients (it is _private_). The Cache-Control header could specify _public_ rather than _private_ in which case the data can be stored in a shared cache, or it could specify _no-store_ in which case the data must not be cached by the client. The following code example shows how to construct a Cache-Control header in a response message:
+	In this example, the Cache-Control header specifies that the data returned should be expired after 600 seconds, and is only suitable for a single client and must not be stored in a shared cache used by other clients (it is _private_). The Cache-Control header could specify _public_ rather than _private_ in which case the data can be stored in a shared cache, or it could specify _no-store_ in which case the data must **not** be cached by the client. The following code example shows how to construct a Cache-Control header in a response message:
 
 	```C#
 	public class OrdersController : ApiController
@@ -422,21 +417,54 @@ In a distributed environment such as that involving a web server and client appl
     	...
     	[Route("api/orders/{id:int:min(0)}")]
     	[HttpGet]
-    	public HttpResponseMessage FindOrderByID(int id)
+    	public IHttpActionResult FindOrderByID(int id)
     	{
-    	    // Find the matching order
-    	    var order = ...
-    	    // Construct the response
-    	    var response = Request.CreateResponse(HttpStatusCode.OK, order);
-    	    // Add the Cache-Control header to the response
-    	    response.Headers.CacheControl = new CacheControlHeaderValue();
-    	    response.Headers.CacheControl.Private = true;
-    	    response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
-    	    return response;
+    		// Find the matching order
+    		Order order = ...;
+    		...
+    		// Create a Cache-Control header for the response
+    		var cacheControlHeader = new CacheControlHeaderValue();
+    		cacheControlHeader.Private = true;
+    		cacheControlHeader.MaxAge = new TimeSpan(0, 10, 0);
+    		...
+
+    		// Return a response message containing the order and the cache control header
+    		OkResultWithCaching<Order> response = new OkResultWithCaching<Order>(order, this)
+    		{
+    			CacheControlHeader = cacheControlHeader
+    		};
+    		return response;
     	}
     	...
 	}
 	```
+
+	This code makes use of a custom _IHttpActionResult_ class named _OkResultWithCaching_. This class enables the controller to set the cache header contents:
+	
+	```C#
+	public class OkResultWithCaching<T> : OkNegotiatedContentResult<T>
+    {
+        public OkResultWithCaching(T content, ApiController controller)
+            : base(content, controller) { }
+
+        public OkResultWithCaching(T content, IContentNegotiator contentNegotiator, HttpRequestMessage request, IEnumerable<MediaTypeFormatter> formatters)
+            : base(content, contentNegotiator, request, formatters) { }
+
+        public CacheControlHeaderValue CacheControlHeader { get; set; }
+        public EntityTagHeaderValue ETag { get; set; }
+
+        public override async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            HttpResponseMessage response = await base.ExecuteAsync(cancellationToken);
+
+            response.Headers.CacheControl = this.CacheControlHeader;
+            response.Headers.ETag = ETag;
+
+            return response;
+        }
+    }
+	```
+
 	> **Note**: The HTTP protocol also defines the _no-cache_ directive for the Cache-Control header. Rather confusingly, this directive does not mean "do not cache" but rather "revalidate the cached information with the server before returning it"; the data can still be cached, but it is checked each time it is used to ensure that it is still current.
 
 	Cache management is the responsibility of the client application or intermediate server, but if properly implemented it can save bandwidth and improve performance by removing the need to fetch data that has already been recently retrieved.
@@ -449,30 +477,32 @@ In a distributed environment such as that involving a web server and client appl
 
 - **Provide ETags to Optimize Query Processing**.
 
-	When a client application retrieves an object, the response message can also include an _ETag_ (Entity Tag). An ETag is an opaque string that indicates the version of a resource; each time a resource changes the Etag is also modified. This ETag should be cached as part of the data by the client application. The following code example shows how to add an ETag as part of the response to an HTTP GET request. This code uses the _GetHashCode_ method of an object to generate a numeric value that identifies the object (you can override this method if necessary and generate your own hash using a technology such as MD5) :
+	When a client application retrieves an object, the response message can also include an _ETag_ (Entity Tag). An ETag is an opaque string that indicates the version of a resource; each time a resource changes the Etag is also modified. This ETag should be cached as part of the data by the client application. The following code example shows how to add an ETag as part of the response to an HTTP GET request. This code uses the _GetHashCode_ method of an object to generate a numeric value that identifies the object (you can override this method if necessary and generate your own hash using an algorithm such as MD5) :
 
 	```C#
 	public class OrdersController : ApiController
 	{
     	...
-    	[Route("api/orders/{id:int:min(0)}")]
-    	[HttpGet]
-    	public HttpResponseMessage FindOrderByID(int id)
+    	public IHttpActionResult FindOrderByID(int id)
     	{
-        	// Find the matching order
-        	var order = ...
-        	// Construct the response
-        	var response = Request.CreateResponse(HttpStatusCode.OK, order);
-        	// Add the Cache-Control header to the response
-        	...
-        	// Generate an ETag and add it to the response
-        	var hashedOrder = order.GetHashCode();
-        	response.Headers.ETag =
-            	new EntityTagHeaderValue(String.Format("\"{0}\"", hashedOrder));
-        	return response;
+    		// Find the matching order
+    		Order order = ...;
+    		...
+
+    		var hashedOrder = order.GetHashCode();
+    		string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
+    		var eTag = new EntityTagHeaderValue(hashedOrderEtag);
+
+    		// Return a response message containing the order and the cache control header
+    		OkResultWithCaching<Order> response = new OkResultWithCaching<Order>(order, this)
+    		{
+    			...,
+    			ETag = eTag
+    		};
+    		return response;
     	}
     	...
-	}
+    }
 	```
 
 	The response message posted by the web API looks like this:
@@ -491,7 +521,7 @@ In a distributed environment such as that involving a web server and client appl
 
 	A client application can issue a subsequent GET request to retrieve the same resource at any time, and if the resource has changed (it has a different ETag) the cached version should be discarded and the new version added to the cache. If a resource is large and requires a significant amount of bandwidth to transmit back to the client, repeated requests to fetch the same data can become inefficient. To combat this, the HTTP protocol defines the following process for optimizing GET requests that you should support in a web API:
 
-	a. The client constructs a GET request containing the ETag for the currently cached version of the resource referenced in an If-None-Match HTTP header:
+	- The client constructs a GET request containing the ETag for the currently cached version of the resource referenced in an If-None-Match HTTP header:
 
 	```HTTP
 	GET http://adventure-works.com/orders/2 HTTP/1.1
@@ -499,15 +529,15 @@ In a distributed environment such as that involving a web server and client appl
 	...
 	```
 
-	b. The GET operation in the web API obtains the current ETag for the requested data (order 2 in the above example), and compares it to the value in the If-None-Match header.
+	- The GET operation in the web API obtains the current ETag for the requested data (order 2 in the above example), and compares it to the value in the If-None-Match header.
 
-	c. If the current ETag for the requested data matches the ETag provided by the request, the resource has not changed and the web API should return an HTTP response with an empty message body and a status code of 304 (Not Modified).
+	- If the current ETag for the requested data matches the ETag provided by the request, the resource has not changed and the web API should return an HTTP response with an empty message body and a status code of 304 (Not Modified).
 
-	d. If the current ETag for the requested data does not match the ETag provided by the request, then the data has changed and the web API should return an HTTP response with the new data in the message body and a status code of 200 (OK).
+	- If the current ETag for the requested data does not match the ETag provided by the request, then the data has changed and the web API should return an HTTP response with the new data in the message body and a status code of 200 (OK).
 
-	e. If the requested data no longer exists then the web API should return an HTTP response with the status code of 404 (Not Found).
+	- If the requested data no longer exists then the web API should return an HTTP response with the status code of 404 (Not Found).
 
-	f. The client uses the status code to maintain the cache. If the data has not changed (status code 304) then the object can remain cached and the client application should continue to use this version of the object. If the data has changed (status code 200) then the cached object should be discarded and the new one inserted. If the data is no longer available (status code 404) then the object should be removed from the cache.
+	- The client uses the status code to maintain the cache. If the data has not changed (status code 304) then the object can remain cached and the client application should continue to use this version of the object. If the data has changed (status code 200) then the cached object should be discarded and the new one inserted. If the data is no longer available (status code 404) then the object should be removed from the cache.
 
 	> **Note**: If the response header contains the Cache-Control header no-store then the object should always be removed from the cache regardless of the HTTP status code.
 
@@ -519,44 +549,86 @@ In a distributed environment such as that involving a web server and client appl
    		...
     	[Route("api/orders/{id:int:min(0)}")]
     	[HttpGet]
-    	public HttpResponseMessage FindOrderByID(int id)
-    	{
-        	// Find the matching order
-        	var order = ...
-        	// If there is no matching order, then return an HTTP Not Found error
-        	if (order == null)
-        	{
-            	return Request.CreateErrorResponse(
-            	    HttpStatusCode.NotFound, Strings.OrderNotFound);
-        	}
-        	...
-        	var hashedOrder = order.GetHashCode();
-        	string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
-        	HttpResponseMessage response = null;
-        	// Retrieve the If-None-Match header from the request (if it exists)
-        	var nonMatchEtags = Request.Headers.IfNoneMatch;
-        	// If there is an Etag in the If-None-Match header and
-        	// this etag matches that of the order just retrieved,
-        	// then create a Not Modified response message
-        	if (nonMatchEtags.Count > 0 &&
-            	String.Compare(nonMatchEtags.First().Tag, hashedOrderEtag) == 0)
-        	{
-            	response = Request.CreateResponse(HttpStatusCode.NotModified);
-        	}
-        	// Otherwise create a response message that contains the order details
-        	else
-        	{
-            	response = Request.CreateResponse(HttpStatusCode.OK, order);
-        	}
-        	// Add the Cache-Control and Etag headers to the response
-        	response.Headers.CacheControl = new CacheControlHeaderValue();
-        	response.Headers.CacheControl.Private = true;
-        	response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
-        	response.Headers.ETag = new EntityTagHeaderValue(hashedOrderEtag);
-        	return response;
-    	}
-    	...
-	}
+    	public IHttpActionResult FindOrderById(int id)
+        {
+            try
+            {
+                // Find the matching order
+    		    Order order = ...;
+
+                // If there is no such order then return NotFound
+                if (order == null)
+                {
+                    return NotFound();
+                }
+
+                // Generate the ETag for the order
+                var hashedOrder = order.GetHashCode();
+                string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
+
+                // Create the Cache-Control and ETag headers for the response
+                IHttpActionResult response = null;
+                var cacheControlHeader = new CacheControlHeaderValue();
+                cacheControlHeader.Public = true;
+                cacheControlHeader.MaxAge = new TimeSpan(0, 10, 0);
+                var eTag = new EntityTagHeaderValue(hashedOrderEtag);
+
+                // Retrieve the If-None-Match header from the request (if it exists)
+                var nonMatchEtags = Request.Headers.IfNoneMatch;
+                
+                // If there is an ETag in the If-None-Match header and
+                // this ETag matches that of the order just retrieved,
+                // then create a Not Modified response message
+                if (nonMatchEtags.Count > 0 &&
+                    String.Compare(nonMatchEtags.First().Tag, hashedOrderEtag) == 0)
+                {
+                    response = new EmptyResultWithCaching()
+                    {
+                        StatusCode = HttpStatusCode.NotModified,
+                        CacheControlHeader = cacheControlHeader,
+                        ETag = eTag
+                    };
+                }
+                // Otherwise create a response message that contains the order details
+                else
+                {
+                    response = new OkResultWithCaching<Order>(order, this)
+                    {
+                        CacheControlHeader = cacheControlHeader,
+                        ETag = eTag
+                    };
+                }
+
+                return response;
+            }
+            catch
+            {
+                return InternalServerError();
+            }
+        }
+    ...
+    }
+	```
+
+	This example incorporates an additional custom _IHttpActionResult_ class named _EmptyResultWithCaching_. This class simply acts as a wrapper around an _HttpResponseMessage_ object that does not contain a response body:
+
+	```C#
+    public class EmptyResultWithCaching : IHttpActionResult
+    {
+        public CacheControlHeaderValue CacheControlHeader { get; set; }
+        public EntityTagHeaderValue ETag { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
+		public Uri Location { get; set; }
+
+        public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            HttpResponseMessage response = new HttpResponseMessage(StatusCode);
+            response.Headers.CacheControl = this.CacheControlHeader;
+            response.Headers.ETag = this.ETag;
+            response.Headers.Location = this.Location;
+            return response;
+        }
+    }
 	```
 
 	> **Tip**: In this example, the ETag for the data is generated by hashing the data retrieved from the underlying data source. If the ETag can be computed in some other way, then the process can be optimized further and the data only needs to be fetched from the data source if it has changed.  This approach is especially useful if the data is large or accessing the data source can result in significant latency (for example, if the data source is a remote database).
@@ -565,7 +637,7 @@ In a distributed environment such as that involving a web server and client appl
 
 	To enable updates over previously cached data, the HTTP protocol supports an optimistic concurrency strategy. If, after fetching and caching a resource, the client application subsequently sends a PUT or DELETE request to change or remove the resource, it should include in If-Match header that references the ETag. The web API can then use this information to determine whether the resource has already been changed by another user since it was retrieved and send an appropriate response back to the client application as follows:
 
-	a. The client constructs a PUT request containing the new details for the resource and the ETag for the currently cached version of the resource referenced in an If-Match HTTP header. The following example shows a PUT request that updates an order:
+	- The client constructs a PUT request containing the new details for the resource and the ETag for the currently cached version of the resource referenced in an If-Match HTTP header. The following example shows a PUT request that updates an order:
 
 	```HTTP
 	PUT http://adventure-works.com/orders/1 HTTP/1.1
@@ -577,15 +649,15 @@ In a distributed environment such as that involving a web server and client appl
 	ProductID=3&Quantity=5&OrderValue=250
 	```
 
-	b. The PUT operation in the web API obtains the current ETag for the requested data (order 1 in the above example), and compares it to the value in the If- Match header.
+	- The PUT operation in the web API obtains the current ETag for the requested data (order 1 in the above example), and compares it to the value in the If-Match header.
 
-	c. If the current ETag for the requested data matches the ETag provided by the request, the resource has not changed and the web API should perform the update, returning a message with HTTP status code 204 (No Content) if it is successful. The response can include Cache-Control and ETag headers for the updated version of the resource. The response should always include the Location header that references the URI of the newly updated resource.
+	- If the current ETag for the requested data matches the ETag provided by the request, the resource has not changed and the web API should perform the update, returning a message with HTTP status code 204 (No Content) if it is successful. The response can include Cache-Control and ETag headers for the updated version of the resource. The response should always include the Location header that references the URI of the newly updated resource.
 
-	d. If the current ETag for the requested data does not match the ETag provided by the request, then the data has been changed by another user since it was fetched and the web API should return an HTTP response with an empty message body and a status code of 412 (Precondition Failed).
+	- If the current ETag for the requested data does not match the ETag provided by the request, then the data has been changed by another user since it was fetched and the web API should return an HTTP response with an empty message body and a status code of 412 (Precondition Failed).
 
-	e. If the resource to be updated no longer exists then the web API should return an HTTP response with the status code of 404 (Not Found).
+	- If the resource to be updated no longer exists then the web API should return an HTTP response with the status code of 404 (Not Found).
 
-	f. The client uses the status code and response headers to maintain the cache. If the data has been updated changed (status code 204) then the object can remain cached (as long as the Cache-Control header does not specify no-store) but the ETag should be updated. If the data was changed by another user changed (status code 412) or not found (status code 404) then the cached object should be discarded.
+	- The client uses the status code and response headers to maintain the cache. If the data has been updated (status code 204) then the object can remain cached (as long as the Cache-Control header does not specify no-store) but the ETag should be updated. If the data was changed by another user changed (status code 412) or not found (status code 404) then the cached object should be discarded.
 
 	The next code example shows an implementation of the PUT operation for the Orders controller:
 
@@ -595,53 +667,69 @@ In a distributed environment such as that involving a web server and client appl
    		...
     	[HttpPut]
     	[Route("api/orders/{id:int}")]
-    	public HttpResponseMessage UpdateExistingOrder(int id, Order order)
-    	{
-        	// Find the order to update
-        	var orderToUpdate = ...
-        	// If there is no matching order, then return an HTTP Not Found error
-        	if (orderToUpdate == null)
-        	{
-            	return Request.CreateErrorResponse(
-            	    HttpStatusCode.NotFound, Strings.OrderNotFound);
-        	}
-        	// Calculate the ETag for the order to be updated
-        	var hashedOrder = orderToUpdate.GetHashCode();
-        	string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
-        	// Retrieve the If-Match header from the request (if it exists)
-        	var matchEtags = Request.Headers.IfMatch;
-        	// If there is an Etag in the If-Match header and
-        	// this etag matches that of the order just retrieved,
-        	// or if there is no etag, then update the Order
-        	if (((matchEtags.Count > 0 &&
-             	String.Compare(matchEtags.First().Tag, hashedOrderEtag) == 0)) ||
-             	matchEtags.Count == 0)
-        	{
-            	// Modify the order
-            	orderToUpdate.OrderValue = order.OrderValue;
-            	orderToUpdate.ProductID = order.ProductID;
-            	orderToUpdate.Quantity = order.Quantity;
-            	...
-            	// Save the order back to the data store
-            	...
-            	// Create the No Content response with Cache-Control,
-            	// ETag, and Location headers
-            	var response = Request.CreateResponse(HttpStatusCode.NoContent);
-            	response.Headers.CacheControl = new CacheControlHeaderValue();
-            	response.Headers.CacheControl.Private = true;
-            	response.Headers.CacheControl.MaxAge = new TimeSpan(0, 10, 0);
-            	hashedOrder = order.GetHashCode();
-            	hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
-            	response.Headers.ETag = new EntityTagHeaderValue(hashedOrderEtag);
-            	response.Headers.Location = new Uri(...);
-            	return response;
-        	}
-        	// Otherwise return a Precondition Failed response
-        	return Request.CreateErrorResponse(HttpStatusCode.PreconditionFailed,
-            	Strings.ConflictingOrderUpdate);
-    	}
-    	...
-	}
+    	        public IHttpActionResult UpdateExistingOrder(int id, DTOOrder order)
+        {
+            try
+            {
+                var baseUri = Constants.GetUriFromConfig();
+                var orderToUpdate = this.ordersRepository.GetOrder(id);
+                if (orderToUpdate == null)
+                {
+                    return NotFound();
+                }
+
+                var hashedOrder = orderToUpdate.GetHashCode(); 
+                string hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
+       
+                // Retrieve the If-Match header from the request (if it exists)
+                var matchEtags = Request.Headers.IfMatch;
+                
+                // If there is an Etag in the If-Match header and
+                // this etag matches that of the order just retrieved,
+                // or if there is no etag, then update the Order
+                if (((matchEtags.Count > 0 &&
+                     String.Compare(matchEtags.First().Tag, hashedOrderEtag) == 0)) ||
+                     matchEtags.Count == 0)
+                {
+                    // Modify the order 
+                    orderToUpdate.OrderValue = order.OrderValue;
+                    orderToUpdate.ProductID = order.ProductID;
+                    orderToUpdate.Quantity = order.Quantity;
+                    
+                    // Save the order back to the data store
+                    // ...
+
+                    // Create the No Content response with Cache-Control, ETag, and Location headers
+                    var cacheControlHeader = new CacheControlHeaderValue();
+                    cacheControlHeader.Private = true;
+                    cacheControlHeader.MaxAge = new TimeSpan(0, 10, 0);
+
+                    hashedOrder = order.GetHashCode();
+                    hashedOrderEtag = String.Format("\"{0}\"", hashedOrder);
+                    var eTag = new EntityTagHeaderValue(hashedOrderEtag);
+                    
+                    var location = new Uri(string.Format("{0}/{1}/{2}", baseUri, Constants.ORDERS, id));
+                    var response = new EmptyResultWithCaching()
+                    {
+                        StatusCode = HttpStatusCode.NoContent,
+                        CacheControlHeader = cacheControlHeader,
+                        ETag = eTag,
+                        Location = location
+                    };
+                    
+                    return response;
+                }        
+                
+                // Otherwise return a Precondition Failed response
+                return StatusCode(HttpStatusCode.PreconditionFailed);
+            }
+            catch
+            {
+                return InternalServerError();
+            }
+        }
+        ...
+    }
 	```
 
 	> **Tip**: Use of the If-Match header is entirely optional, and if it is omitted the web API will always attempt to update the specified order, possibly blindly overwriting an update made by another user. To avoid problems due to lost updates, always provide an If-Match header.
@@ -655,59 +743,76 @@ There may be occasions when a client application needs to issue requests that se
 
 	Some resources may be large objects or include large fields, such as graphics images or other types of binary data. A web API should support streaming to enable optimized uploading and downloading of these resources.
 
-	The HTTP protocol provides the chunked transfer encoding mechanism to stream large data objects back to a client. When the client sends an HTTP GET request for a large object, the web API can send the reply back in piecemeal _chunks_ over an HTTP connection. The length of the data in the reply may not be known initially (it might be generated), so the server hosting the web API should send a response message with each chunk that specifies the Transfer-Encoding: Chunked header rather than a Content-Length header. The client application can receive each chunk in turn to build up the complete response. The data transfer completes when the server sends back a final chunk with zero size.
+	The HTTP protocol provides the chunked transfer encoding mechanism to stream large data objects back to a client. When the client sends an HTTP GET request for a large object, the web API can send the reply back in piecemeal _chunks_ over an HTTP connection. The length of the data in the reply may not be known initially (it might be generated), so the server hosting the web API should send a response message with each chunk that specifies the Transfer-Encoding: Chunked header rather than a Content-Length header. The client application can receive each chunk in turn to build up the complete response. The data transfer completes when the server sends back a final chunk with zero size.	You can implement chunking in the ASP.NET Web API by using the _PushStreamContent_ class. 
 
-	You can implement chunking in the ASP.NET Web API by using the _PushStreamContent_ class. The following example shows an operation that responds to HTTP GET requests for product images. Each product has its own image held in blob storage, and the Get method uses a _PushStreamContent_ object to read the image data from appropriate blob and transmit it asynchronously as the content of the response message:
+	The following example shows an operation that responds to HTTP GET requests for product images:
 
 	```C#
 	public class ProductImagesController : ApiController
 	{
     	...
     	[HttpGet]
-    	[Route("productimages/{id:int}")]
-    	public HttpResponseMessage Get(int id)
-    	{
-        	try
-        	{
-        	    var container =
-        	        ConnectToBlobContainer(...);
-        	    if (!BlobExists(container, string.Format("image{0}.jpg", id)))
-        	    {
-        	        return Request.CreateErrorResponse(
-        	            HttpStatusCode.NotFound, Strings.NoSuchImageFile);
-        	    }
-        	    var response = Request.CreateResponse();
-        	    response.Content = new PushStreamContent(
-        	        async (outputStream, httpContent, transportContent) =>
-        	    {
-        	        try
-        	        {
-        	            CloudBlockBlob blockBlob =
-        	                container.GetBlockBlobReference(
-        	                    String.Format("image{0}.jpg", id));
-        	            await blockBlob.DownloadToStreamAsync(outputStream);
-        	        }
-        	        finally
-        	        {
-        	            outputStream.Close();
-        	        }
-        	    });
-        	    response.StatusCode = HttpStatusCode.OK;
-        	    response.Content.Headers.ContentType =
-        	        new MediaTypeHeaderValue("image/jpeg");
-        	    return response;
-        	}
-        	catch
-        	{
-        	    return Request.CreateErrorResponse(
-        	        HttpStatusCode.InternalServerError, Strings.ServerError);
-        	}
-    	}
+        [Route("productimages/{id:int}")]
+        public IHttpActionResult Get(int id)
+        {
+            try
+            {
+                var container = ConnectToBlobContainer(Constants.PRODUCTIMAGESCONTAINERNAME);
+
+                if (!BlobExists(container, string.Format("image{0}.jpg", id)))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return new FileDownloadResult()
+                    {
+                        Container = container,
+                        ImageId = id
+                    };
+                }
+            }
+            catch
+            {
+                return InternalServerError();
+            }
+        }
     	...
 	}
 	```
 
 	In this example, _ConnectBlobToContainer_ is a helper method that connects to a specified container (name not shown) in Azure Blob storage. _BlobExists_ is another helper method that returns a Boolean value that indicates whether a blob with the specified name exists in the blob storage container.
+
+	Each product has its own image held in blob storage. The _FileDownloadResult_ class is a custom _IHttpActionResult_ class that uses a _PushStreamContent_ object to read the image data from appropriate blob and transmit it asynchronously as the content of the response message:
+
+	```C#
+	public class FileDownloadResult : IHttpActionResult
+    {
+        public CloudBlobContainer Container { get; set; }
+        public int ImageId { get; set; }
+
+        public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            var response = new HttpResponseMessage();
+            response.Content = new PushStreamContent(async (outputStream, _, __) =>
+            {
+                try
+                {
+                    CloudBlockBlob blockBlob = Container.GetBlockBlobReference(String.Format("image{0}.jpg", ImageId));
+                    await blockBlob.DownloadToStreamAsync(outputStream);
+                }
+                finally
+                {
+                    outputStream.Close();
+                }
+            });
+
+            response.StatusCode = HttpStatusCode.OK;
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+            return response;
+        }
+    }
+	```
 
 	You can also apply streaming to upload operations if a client needs to POST a new resource that includes a large object. The next example shows the Post method for the _ProductImages_ controller. This method enables the client to upload a new product image:
 
@@ -715,41 +820,57 @@ There may be occasions when a client application needs to issue requests that se
 	public class ProductImagesController : ApiController
 	{
     	...
-    	[HttpPost]
-    	[Route("productimages")]
-    	public async Task<HttpResponseMessage> Post()
-    	{
-    	    try
-    	    {
-    	        if (!Request.Content.Headers.ContentType.MediaType.Equals(
-    	               "image/jpeg"))
-    	        {
-    	            return Request.CreateErrorResponse(
-    	                HttpStatusCode.UnsupportedMediaType,
-    	                Strings.MediaNotSupported);
-    	        }
-    	        var container = ConnectToBlobContainer(...);
-    	        int id = ... // Create a new ID for the image
-    	        CloudBlockBlob blockBlob = container.GetBlockBlobReference(
-    	            String.Format("image{0}.jpg", id));
-    	        await blockBlob.UploadFromStreamAsync(
-    	            await Request.Content.ReadAsStreamAsync());
-    	        var response = Request.CreateResponse(HttpStatusCode.OK);
-    	        var baseUri = string.Format("{0}://{1}:{2}",
-    	            Request.RequestUri.Scheme, Request.RequestUri.Host,
-    	            Request.RequestUri.Port);
-    	        response.Headers.Location =
-    	            new Uri(string.Format("{0}/productimages/{1}", baseUri, id));
-    	        return response;
-    	    }
-    	    catch
-    	    {
-    	        return Request.CreateErrorResponse(
-    	            HttpStatusCode.InternalServerError, Strings.ServerError);
-    	    }
-    	}
+        [HttpPost]
+        [Route("productimages")]
+        public async Task<IHttpActionResult> Post()
+        {
+            try
+            {
+                if (!Request.Content.Headers.ContentType.MediaType.Equals("image/jpeg"))
+                {
+                    return StatusCode(HttpStatusCode.UnsupportedMediaType);
+                }
+                else
+                {
+                    var id = new Random().Next(); // Use a random int as the key for the new resource. Should probably check that this key has not already been used 
+                    var container = ConnectToBlobContainer(Constants.PRODUCTIMAGESCONTAINERNAME);
+                    return new FileUploadResult()
+                    {
+                        Container = container,
+                        ImageId = id,
+                        Request = Request
+                    };
+                }
+            }
+            catch
+            {
+                return InternalServerError();
+            }
+        }
     	...
 	}
+	```
+
+	This code uses another custom _IHttpActionResult_ class called _FileUploadResult_. This class contains the logic for uploading the data asynchronously:
+
+	```C#
+    public class FileUploadResult : IHttpActionResult
+    {
+        public CloudBlobContainer Container { get; set; }
+        public int ImageId { get; set; }
+        public HttpRequestMessage Request { get; set; }
+
+        public async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            var response = new HttpResponseMessage();
+            CloudBlockBlob blockBlob = Container.GetBlockBlobReference(String.Format("image{0}.jpg", ImageId));
+            await blockBlob.UploadFromStreamAsync(await Request.Content.ReadAsStreamAsync());
+            var baseUri = string.Format("{0}://{1}:{2}", Request.RequestUri.Scheme, Request.RequestUri.Host, Request.RequestUri.Port);
+            response.Headers.Location = new Uri(string.Format("{0}/productimages/{1}", baseUri, ImageId));
+            response.StatusCode = HttpStatusCode.OK;
+            return response;
+        }
+    }
 	```
 
 	> **Tip**: The volume of data that you can upload to a web service is not constrained by streaming, and a single request could conceivably result in a massive object that consumes considerable resources. If, during the streaming process, the web API determines that the amount of data in a request has exceeded some acceptable bounds, it can abort the operation and return a response message with status code 413 (Request Entity Too Large).
@@ -812,27 +933,27 @@ The same web API might be utilized by many client applications running anywhere 
 
 	You can implement a simple polling mechanism by providing a _polling_ URI that acts as a virtual resource using the following approach:
 
-	a. The client application sends the initial request to the web API.
+	1. The client application sends the initial request to the web API.
 
-	b. The web API stores information about the request in a table held in table storage or Microsoft Azure Cache, and generates a unique key for this entry, possibly in the form of a GUID.
+	2. The web API stores information about the request in a table held in table storage or Microsoft Azure Cache, and generates a unique key for this entry, possibly in the form of a GUID.
 
-	c. The web API initiates the processing as a separate task. The web API records the state of the task in the table as _Running_.
+	3. The web API initiates the processing as a separate task. The web API records the state of the task in the table as _Running_.
 
-	d. The web API returns a response message with HTTP status code 202 (Accepted), and the GUID of the table entry in the body of the message.
+	4. The web API returns a response message with HTTP status code 202 (Accepted), and the GUID of the table entry in the body of the message.
 
-	e. When the task has completed, the web API stores the results in the table, and sets the state of the task to _Complete_. Note that if the task fails, the web API could also store information about the failure and set the status to _Failed_.
+	5. When the task has completed, the web API stores the results in the table, and sets the state of the task to _Complete_. Note that if the task fails, the web API could also store information about the failure and set the status to _Failed_.
 
-	f. While the task is running, the client can continue performing its own processing. It can periodically send a request to the URI _/polling/{guid}_ where _{guid}_ is the GUID returned in the 202 response message by the web API.
+	6. While the task is running, the client can continue performing its own processing. It can periodically send a request to the URI _/polling/{guid}_ where _{guid}_ is the GUID returned in the 202 response message by the web API.
 
-	g. The web API at the _/polling{guid}_ URI queries the state of the corresponding task in the table and returns a response message with HTTP status code 200 (OK) containing this state (_Running_, _Complete_, or _Failed_). If the task has completed or failed, the response message can also include the results of the processing or any information available about the reason for the failure.
+	7. The web API at the _/polling{guid}_ URI queries the state of the corresponding task in the table and returns a response message with HTTP status code 200 (OK) containing this state (_Running_, _Complete_, or _Failed_). If the task has completed or failed, the response message can also include the results of the processing or any information available about the reason for the failure.
 
 	If you prefer to implement notifications, the options available include:
 
-	a. Using an Azure Notification Hub to push asynchronous responses to client applications. The page [Azure Notification Hubs Notify Users](http://azure.microsoft.com/en-us/documentation/articles/notification-hubs-aspnet-backend-windows-dotnet-notify-users/) on the Microsoft website provides further details.
+	- Using an Azure Notification Hub to push asynchronous responses to client applications. The page [Azure Notification Hubs Notify Users](http://azure.microsoft.com/en-us/documentation/articles/notification-hubs-aspnet-backend-windows-dotnet-notify-users/) on the Microsoft website provides further details.
 
-	b. Using the Comet model to retain a persistent network connection between the client and the server hosting the web API, and using this connection to push messages from the server back to the client. The MSDN magazine article [Building a Simple Comet Application in the Microsoft .NET Framework](https://msdn.microsoft.com/en-us/magazine/jj891053.aspx) describes an example solution.
+	- Using the Comet model to retain a persistent network connection between the client and the server hosting the web API, and using this connection to push messages from the server back to the client. The MSDN magazine article [Building a Simple Comet Application in the Microsoft .NET Framework](https://msdn.microsoft.com/en-us/magazine/jj891053.aspx) describes an example solution.
 
-	c. Using SignalR to push data in real-time from the web server to the client over a persistent network connection. SignalR is available for ASP.NET web applications as a NuGet package. You can find more information on the [ASP.NET SignalR](http://signalr.net/) website.
+	- Using SignalR to push data in real-time from the web server to the client over a persistent network connection. SignalR is available for ASP.NET web applications as a NuGet package. You can find more information on the [ASP.NET SignalR](http://signalr.net/) website.
 
 	> **Note**: Comet and SignalR both utilize persistent network connections between the web server and the client application. This can affect scalability as a large number of clients may require an equally large number of concurrent connections.
 
@@ -984,7 +1105,7 @@ Watch out for unexpected response status codes in the 5xx range. These messages 
 You should also create and run performance tests to check that the web API operates satisfactorily under duress. You can build a web performance and load test project by using Visual Studio Ultimate. For more information, see the page [Run performance tests on an application before a release](https://msdn.microsoft.com/library/dn250793.aspx) on the Microsoft website.
 
 # Related patterns
-- The [façade](http://en.wikipedia.org/wiki/Facade_pattern) pattern describes how to provide an interface to a web API.…
+- The [façade](http://en.wikipedia.org/wiki/Facade_pattern) pattern describes how to provide an interface to a web API.
 
 # More information
 - The page [Learn About ASP.NET Web API](http://www.asp.net/web-api) on the Microsoft website provides a detailed introduction to building RESTful web services by using the Web API.
