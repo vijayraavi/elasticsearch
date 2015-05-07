@@ -9,7 +9,6 @@ A carefully-designed RESTful web API defines the resources, relationships, and n
 
 # Considerations for implementing a RESTful web API
 The following sections illustrate best practice for using the ASP.NET Web API template to build a RESTful web API. For detailed information on using the Web API template, visit the [Learn About ASP.NET Web API](http://www.asp.net/web-api) page on the Microsoft website.
-> **Note**: This guidance is accompanied by a sample solution that provides a complete, working solution of the principles described in the following sections. The solution is called Orders, and it includes a web API, test client, and unit tests. The web API is based on the scenario of an e-commerce system and exposes information about customers, orders, and products.
 
 ## Considerations for implementing request routing
 
@@ -885,9 +884,21 @@ There may be occasions when a client application needs to issue requests that se
 
 	HTTP HEAD requests and partial responses are described in more detail in the API Design Guidance document.
 
-- **Enable Continue status messages**.
+- **Avoid sending unnecessary Continue status messages in client applications**.
 
-	A client application that is about to send or receive a large amount of data to a server may determine first whether the server is actually willing to accept the request. Prior to sending the data, the client application can submit an HTTP request with an Expect: 100-Continue header and an empty body. If the server is willing to handle the request, it should respond with a message that specifies the HTTP status 100 (Continue). The client application can then proceed and send the complete request.
+	A client application that is about to send a large amount of data to a server may determine first whether the server is actually willing to accept the request. Prior to sending the data, the client application can submit an HTTP request with an Expect: 100-Continue header, a Content-Length header that indicates the size of the data, but an empty message body. If the server is willing to handle the request, it should respond with a message that specifies the HTTP status 100 (Continue). The client application can then proceed and send the complete request including the data in the message body.
+
+	If you are hosting a service by using IIS, the HTTP.sys driver automatically detects and handles Expect: 100-Continue headers before passing requests to your web application. This means that you are unlikely to see these headers in your application code, and you can assume that IIS has already filtered any messages that it deems to be unfit or too large.
+
+	If you are building client applications by using the .NET Framework, then all POST and PUT messages will first send messages with Expect: 100-Continue headers by default. As with the server-side, the process is handled transparently by the .NET Framework. However, this process results in each POST and PUT request causing 2 round-trips to the server, even for small requests. If your application is not sending requests with large amounts of data, you can disable this feature by using the _ServicePointManager_ class to create _ServicePoint_ objects in the client application. A _ServicePoint_ object handles the connections that the client makes to a server based on the scheme and host fragments of URIs that identify resources on the server. You can then set the _Expect100Continue_ property of the _ServicePoint_ object to false. All subsequent POST and PUT requests made by the client through a URI that matches the scheme and host fragments of the _ServicePoint_ object will be sent without Expect: 100-Continue headers. The following code shows how to configure a _ServicePoint_ object that configures all requests sent to URIs with a scheme of `http` and a host of `www.contoso.com`.
+
+	```C#
+	Uri uri = new Uri("http://www.contoso.com/");
+	ServicePoint sp = ServicePointManager.FindServicePoint(uri);
+	sp.Expect100Continue = false;
+	```
+
+	For more information, see the [ServicePoint Class](https://msdn.microsoft.com/library/system.net.servicepoint.aspx) page on the Microsoft website.
 
 - **Support pagination for requests that may return large numbers of objects**.
 
