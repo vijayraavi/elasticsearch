@@ -323,7 +323,7 @@ The following code shows an example that traps different conditions and returns 
 	```C#
 	[HttpDelete]
 	[Route("customers/{id:int}")]
-	public HttpResponseMessage DeleteCustomer(int id)
+	public IHttpActionResult DeleteCustomer(int id)
 	{
 		try
 		{
