@@ -7,8 +7,8 @@ Some topics in this guidance are under discussion and may change in the future. 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [API implementation guidance](#api-implementation-guidance)
 - [Overview](#overview)
 - [Considerations for implementing a RESTful web API](#considerations-for-implementing-a-restful-web-api)
   - [Considerations for implementing request routing](#considerations-for-implementing-request-routing)
@@ -18,14 +18,14 @@ Some topics in this guidance are under discussion and may change in the future. 
   - [Considerations for handling large requests and responses](#considerations-for-handling-large-requests-and-responses)
   - [Considerations for maintaining responsiveness, scalability, and availability](#considerations-for-maintaining-responsiveness-scalability-and-availability)
   - [Considerations for publishing and managing a web API](#considerations-for-publishing-and-managing-a-web-api)
-  - [Publishing a web API by using the Azure API Management Service](#publishing-a-web-api-by-using-the-azure-api-management-service)
+  - [Considerations for testing a web API](#considerations-for-testing-a-web-api)
+- [Publishing and managing a web API by using the Azure API Management Service](#publishing-and-managing-a-web-api-by-using-the-azure-api-management-service)
   - [Supporting developers building client applications](#supporting-developers-building-client-applications)
     - [Documenting the REST operations for a web API](#documenting-the-rest-operations-for-a-web-api)
     - [Implementing a client SDK](#implementing-a-client-sdk)
-  - [Managing and monitoring a web API](#managing-and-monitoring-a-web-api)
+  - [Monitoring a web API](#monitoring-a-web-api)
     - [Monitoring a web API directly](#monitoring-a-web-api-directly)
     - [Monitoring a web API through the API Management Service](#monitoring-a-web-api-through-the-api-management-service)
-- [Considerations for testing a web API](#considerations-for-testing-a-web-api)
 - [Related patterns](#related-patterns)
 - [More information](#more-information)
 
@@ -1022,8 +1022,6 @@ To make a web API available for client applications, the web API must be deploye
 - Regulatory requirements might mandate logging and auditing of all requests and responses.
 - To ensure availability, it may be necessary to monitor the health of the server hosting the web API and restart it if necessary.
 
-These concerns are described in more detail in the API Design Guidance document.
-
 It is useful to be able to decouple these issues from the technical issues concerning the implementation of the web API. For this reason, consider creating a [façade](http://en.wikipedia.org/wiki/Facade_pattern), running as a separate process and that routes requests to the web API. The façade can provide the management operations and forward validated requests to the web API. Using a façade can also bring many functional advantages, including:
 
 - Acting as an integration point for multiple web APIs.
@@ -1031,9 +1029,48 @@ It is useful to be able to decouple these issues from the technical issues conce
 - Caching requests and responses to reduce load on the server hosting the web API.
 
 <a name="publishing-a-web-API"></a>
-## Publishing a web API by using the Azure API Management Service
 
-Azure provides the API Management Service which you can use to publish and manage a web API. Using this facility, you can generate a service that acts a façade for one or more web APIs. The service is itself a scalable web service that you can create and configure by using the Azure Management portal. You can use this service to publish and manage a web API as follows:
+## Considerations for testing a web API
+A web API should be tested as thoroughly as any other piece of software. You should consider creating unit tests to validate the functionality of each operation, as you would with any other type of application. For more information, see the page [Verifying Code by Using Unit Tests](https://msdn.microsoft.com/library/dd264975.aspx) on the Microsoft website.
+
+> **Note**: The sample web API available with this guidance includes a test project that shows how to perform unit testing over selected operations.
+
+The nature of a web API brings its own additional requirements to verify that it operates correctly. You should pay particular attention to the following aspects:
+
+- Test all routes to verify that they invoke the correct operations. Be especially aware of HTTP status code 405 (Method Not Allowed) being returned unexpectedly as this can indicate a mismatch between a route and the HTTP methods (GET, POST, PUT, DELETE) that can be dispatched to that route.
+
+	Send HTTP requests to routes that do not support them, such as submitting a POST request to a specific resource (POST requests should only be sent to resource collections). In these cases, the only valid response _should_ be status code 405 (Not Allowed).
+
+- Verify that all routes are protected properly and are subject to the appropriate authentication and authorization checks.
+
+	> **Note**: Some aspects of security such as user authentication are most likely to be the responsibility of the host environment rather than the web API, but it is still necessary to include security tests as part of the deployment process.
+
+- Test the exception handling performed by each operation and verify that an appropriate and meaningful HTTP response is passed back to the client application.
+- Verify that request and response messages are well-formed. For example, if an HTTP POST request contains the data for a new resource in x-www-form-urlencoded format, confirm that the corresponding operation correctly parses the data, creates the resources, and returns a response containing the details of the new resource, including the correct Location header.
+- Verify all links and URIs in response messages. For example, an HTTP POST message should return the URI of the newly-created resource. All HATEOAS links should be valid.
+
+	> **Important**: If you publish the web API through an API Management Service, then these URIs should reflect the URL of the management service and not that of the web server hosting the web API.
+
+- Ensure that each operation returns the correct status codes for different combinations of input. For example:
+	- If a query is successful, it should return status code 200 (OK)
+	- If a resource is not found, the operation should returs HTTP status code 404 (Not Found).
+	- If the client sends a request that successfully deletes a resource, the status code should be 204 (No Content).
+	- If the client sends a request that creates a new resource, the status code should be 201 (Created)
+
+Watch out for unexpected response status codes in the 5xx range. These messages are usually reported by the host server to indicate that it was unable to fulfil a valid request.
+
+- Test the different request header combinations that a client application can specify and ensure that the web API returns the expected information in response messages. Examples of client request headers include:
+	- **Accept**. The format of the data in the body of the response should match the format specified by the client request. The Content-Type header of the response should specify the format of the data returned.
+	- **ETag** and **If-None-Match**. If the client application implements client-side caching it can provide these headers to indicate which version of an object it currently has in cache, and how the web API should handle the request. The section [Considerations for Optimizing Client-Side Data Access](#considerations-for-optimizing) earlier in this guidance describes how these requests should be handled.
+	- **Range**. If an operation supports partial responses (if a request can return a large amount of data, for example), verify that the operation respects any client Range headers and responds with the correct data and the appropriate Accept-Ranges, Content-Length, and Content-Range headers. The section [Considerations for Handling Large Requests and Responses](#considerations-for-handling-large) in this guidance provides more information on these requests.
+- Test query strings. If an operation can take optional parameters (such as pagination requests), test the different combinations and order of parameters.
+- Verify that asynchronous operations complete successfully. If the web API supports streaming for requests that return large binary objects (such as video or audio), ensure that client requests are not blocked while the data is streamed. If the web API implements polling for long-running data modification operations, verify that that the operations report their status correctly as they proceed. For more information, see the section [Considerations for Maintaining Responsiveness, Scalability, and Availability](#considerations-for-maintaining-responsiveness) in this guidance.
+
+You should also create and run performance tests to check that the web API operates satisfactorily under duress. You can build a web performance and load test project by using Visual Studio Ultimate. For more information, see the page [Run performance tests on an application before a release](https://msdn.microsoft.com/library/dn250793.aspx) on the Microsoft website.
+
+# Publishing and managing a web API by using the Azure API Management Service
+
+Azure provides the [API Management Service](http://azure.microsoft.com/en-us/documentation/services/api-management/) which you can use to publish and manage a web API. Using this facility, you can generate a service that acts a façade for one or more web APIs. The service is itself a scalable web service that you can create and configure by using the Azure Management portal. You can use this service to publish and manage a web API as follows:
 
 1. Deploy the web API to a website, Azure cloud service, or Azure virtual machine.
 2. Connect the API management service to the web API. Requests sent to the URL of the management API are mapped to URIs in the web API. The same API management service can route requests to more than one web API. This enables you to aggregate multiple web APIs into a single management service. Similarly, the same web API can be referenced from more than one API management service if you need to restrict or partition the functionality available to different applications.
@@ -1073,22 +1110,7 @@ Building a client application that invokes REST requests to access a web API req
 
 Creating a client-side SDK is a considerable undertaking as it has to be implemented consistently and tested carefully. However, much of this process can be made mechanical, and many vendors supply tools that can automate many of these tasks.
 
-## Managing and monitoring a web API
-
-A web API is typically implemented as a service deployed across one or more web servers. Client applications send HTTP requests to the web server which routes them to the appropriate operation. However, rather than providing direct access to the web API and web server for client applications, it may be advantageous to route all requests through a separate service that acts as a façade and that forwards requests to the web server. This organization provides several advantages, including:
-
-- Decoupling security concerns from the web API. The façade can take responsibility for authenticating and authorizing requests. The authentication process can be implemented and configured independently from the web API. The façade can enforce access control and act as a filter for poison message attacks. The web server hosting the web API can be protected behind a firewall that only permits traffic to and from the façade.
-- Regulating the traffic to the web API, throttling or temporarily blocking requests during periods of high demand, and possibly limit the volume of requests that come from a single source (or set of sources). In this way, the façade can help to ensure that throughput meets agreed quality of service parameters, and it can also help to reduce the effects of DDOS attacks.
-- Metering the volume of traffic, which can aid scalability by helping to establish whether to start and stop additional instances of the web server hosting the web API.
-- Implementing tiered SLAs (for high value customers), routing traffic to specific high-performance servers based on policy and business agreements for availability.
-- Providing a point for logging requests both for debugging and auditing purposes.
-- Health monitoring. The façade can periodically ping the web server and if it fails to respond it can arrange for the web server to be restarted.
-- Composing or aggregating multiple web APIs into a single point of access. The façade can route requests to different web servers each of which implement different web APIs. Client applications see the façade as a single source and are not necessarily aware of how the web APIs are partitioned.
-- Transforming messages. The façade can modify messages and convert them into a different format before passing them to the web API. This feature can enable the structure of the web API to be minimized while reducing the impact on existing client applications.
-- Translating communications protocols. The façade can convert RESTful HTTP requests into different formats (such as SOAP) and forward them on to a web API if that web API does not understand raw HTTP messages. Response messages from the web API can be translated back into RESTful HTTP responses. Similarly, if the client application does not send RESTful HTTP requests, the façade can convert these messages into HTTP requests before forwarding them to the web API.
-- Caching requests and responses. The façade can implement a caching mechanism that recognizes repeated requests and provides responses without invoking the corresponding web API. Note that this mechanism requires careful configuration to prevent multiple copies of the same data being cached by the façade if the web server implements versioning, as described at the end of the previous section.
-
-> **Note**: Microsoft Azure provides the API Management Service, available at [http://azure.microsoft.com/en-us/documentation/services/api-management](http://azure.microsoft.com/en-us/documentation/services/api-management/) which can implement many of these features.
+## Monitoring a web API
 
 Depending on how you have published and deployed your web API you can monitor the web API directly, or you can gather usage and health information by analyzing the traffic that passes through the API Management service.
 
@@ -1119,44 +1141,6 @@ If you have published your web API by using the API Management service, the API 
 You can use this information to determine whether a particular web API or operation is causing a bottleneck, and if necessary scale the host environment and add more servers. You can also ascertain whether one or more applications are using a disproportionate volume of resources and apply the appropriate policies to set quotas and limit call rates.
 
 > **Note**: You can change the details for a published product, and the changes are applied immediately. For example, you can add or remove an operation from a web API without requiring that you republish the product that contains the web API.
-
-# Considerations for testing a web API
-A web API should be tested as thoroughly as any other piece of software. You should consider creating unit tests to validate the functionality of each operation, as you would with any other type of application. For more information, see the page [Verifying Code by Using Unit Tests](https://msdn.microsoft.com/library/dd264975.aspx) on the Microsoft website.
-
-> **Note**: The sample web API available with this guidance includes a test project that shows how to perform unit testing over selected operations.
-
-The nature of a web API brings its own additional requirements to verify that it operates correctly. You should pay particular attention to the following aspects:
-
-- Test all routes to verify that they invoke the correct operations. Be especially aware of HTTP status code 405 (Method Not Allowed) being returned unexpectedly as this can indicate a mismatch between a route and the HTTP methods (GET, POST, PUT, DELETE) that can be dispatched to that route.
-
-	Send HTTP requests to routes that do not support them, such as submitting a POST request to a specific resource (POST requests should only be sent to resource collections). In these cases, the only valid response _should_ be status code 405 (Not Allowed).
-
-- Verify that all routes are protected properly and are subject to the appropriate authentication and authorization checks.
-
-	> **Note**: Some aspects of security such as user authentication are most likely to be the responsibility of the host environment rather than the web API, but it is still necessary to include security tests as part of the deployment process.
-
-- Test the exception handling performed by each operation and verify that an appropriate and meaningful HTTP response is passed back to the client application.
-- Verify that request and response messages are well-formed. For example, if an HTTP POST request contains the data for a new resource in x-www-form-urlencoded format, confirm that the corresponding operation correctly parses the data, creates the resources, and returns a response containing the details of the new resource, including the correct Location header.
-- Verify all links and URIs in response messages. For example, an HTTP POST message should return the URI of the newly-created resource. All HATEOAS links should be valid.
-
-	> **Important**: If you publish the web API through an API Management Service, then these URIs should reflect the URL of the management service and not that of the web server hosting the web API.
-
-- Ensure that each operation returns the correct status codes for different combinations of input. For example:
-	- If a query is successful, it should return status code 200 (OK)
-	- If a resource is not found, the operation should returs HTTP status code 404 (Not Found).
-	- If the client sends a request that successfully deletes a resource, the status code should be 204 (No Content).
-	- If the client sends a request that creates a new resource, the status code should be 201 (Created)
-
-Watch out for unexpected response status codes in the 5xx range. These messages are usually reported by the host server to indicate that it was unable to fulfil a valid request.
-
-- Test the different request header combinations that a client application can specify and ensure that the web API returns the expected information in response messages. Examples of client request headers include:
-	- **Accept**. The format of the data in the body of the response should match the format specified by the client request. The Content-Type header of the response should specify the format of the data returned.
-	- **ETag** and **If-None-Match**. If the client application implements client-side caching it can provide these headers to indicate which version of an object it currently has in cache, and how the web API should handle the request. The section [Considerations for Optimizing Client-Side Data Access](#considerations-for-optimizing) earlier in this guidance describes how these requests should be handled.
-	- **Range**. If an operation supports partial responses (if a request can return a large amount of data, for example), verify that the operation respects any client Range headers and responds with the correct data and the appropriate Accept-Ranges, Content-Length, and Content-Range headers. The section [Considerations for Handling Large Requests and Responses](#considerations-for-handling-large) in this guidance provides more information on these requests.
-- Test query strings. If an operation can take optional parameters (such as pagination requests), test the different combinations and order of parameters.
-- Verify that asynchronous operations complete successfully. If the web API supports streaming for requests that return large binary objects (such as video or audio), ensure that client requests are not blocked while the data is streamed. If the web API implements polling for long-running data modification operations, verify that that the operations report their status correctly as they proceed. For more information, see the section [Considerations for Maintaining Responsiveness, Scalability, and Availability](#considerations-for-maintaining-responsiveness) in this guidance.
-
-You should also create and run performance tests to check that the web API operates satisfactorily under duress. You can build a web performance and load test project by using Visual Studio Ultimate. For more information, see the page [Run performance tests on an application before a release](https://msdn.microsoft.com/library/dn250793.aspx) on the Microsoft website.
 
 # Related patterns
 - The [façade](http://en.wikipedia.org/wiki/Facade_pattern) pattern describes how to provide an interface to a web API.

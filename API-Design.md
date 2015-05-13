@@ -6,23 +6,23 @@ Some topics in this guidance are under discussion and may change in the future. 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [API design guidance](#api-design-guidance)
   - [Overview](#overview)
   - [Introduction to Representational State Transfer (REST)](#introduction-to-representational-state-transfer-rest)
   - [Design and structure of a RESTful web API](#design-and-structure-of-a-restful-web-api)
-  - [Organizing the web API around resources](#organizing-the-web-api-around-resources)
-  - [Defining operations in terms of HTTP methods](#defining-operations-in-terms-of-http-methods)
-  - [Processing HTTP requests](#processing-http-requests)
-  - [Filtering and paginating data](#filtering-and-paginating-data)
-  - [Handling large binary resources](#handling-large-binary-resources)
+    - [Organizing the web API around resources](#organizing-the-web-api-around-resources)
+    - [Defining operations in terms of HTTP methods](#defining-operations-in-terms-of-http-methods)
+    - [Processing HTTP requests](#processing-http-requests)
+    - [Filtering and paginating data](#filtering-and-paginating-data)
+    - [Handling large binary resources](#handling-large-binary-resources)
   - [Using the HATEOAS approach to enable navigation to related resources](#using-the-hateoas-approach-to-enable-navigation-to-related-resources)
   - [Versioning a RESTful web API](#versioning-a-restful-web-api)
-  - [No versioning](#no-versioning)
-  - [URI versioning](#uri-versioning)
-  - [Query string versioning](#query-string-versioning)
-  - [Header versioning](#header-versioning)
-  - [Media type versioning](#media-type-versioning)
+    - [No versioning](#no-versioning)
+    - [URI versioning](#uri-versioning)
+    - [Query string versioning](#query-string-versioning)
+    - [Header versioning](#header-versioning)
+    - [Media type versioning](#media-type-versioning)
 - [More information](#more-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -86,7 +86,7 @@ The keys to designing a successful web API are simplicity and consistency. A Web
 
 A RESTful web API is focused on exposing a set of connected resources, and providing the core operations that enable an application to manipulate these resources and easily navigate between them. For this reason, the URIs that constitute a typical RESTful web API should be oriented towards the data that it exposes, and use the facilities provided by HTTP to operate on this data. This approach requires a different mindset from that typically employed when designing a set of classes in an object-oriented API which tends to be more motivated by the behavior of objects and classes. Additionally, a RESTful web API should be stateless and not depend on operations being invoked in a particular sequence. The following sections summarize the points you should consider when designing a RESTful web API.
 
-## Organizing the web API around resources
+### Organizing the web API around resources
 
 > **Tip**: The URIs exposed by a REST web service should be based on nouns (the data to which the web API provides access) and not verbs (what an application can do with the data).
 
@@ -108,7 +108,7 @@ Consider resources as business objects that are made available to client applica
 
 Finally, it might not be possible to map every operation implemented by a web API to a specific resource. You can handle such _non-resource_ scenarios through HTTP GET requests that invoke a piece of functionality and return the results as an HTTP response message. A web API that implements simple calculator-style operations such as add and subtract could provide URIs that expose these operations as pseudo resources and utilize the query string to specify the parameters required. For example a GET request to the URI _/add?operand1=99&operand2=1_ could return a response message with the body containing the value 100, and GET request to the URI _/subtract?operand1=50&operand2=20_ could return a response message with the body containing the value 30. However, only use non-resource URIs sparingly.
 
-## Defining operations in terms of HTTP methods
+### Defining operations in terms of HTTP methods
 
 The HTTP protocol defines a number of methods that assign semantic meaning to a request. The common HTTP methods used by most RESTful web APIs are:
 
@@ -131,7 +131,7 @@ A POST request creates a new resource with data provided in the body of the requ
 
 > **Note**: Strictly speaking, an HTTP PUT request replaces an existing resource with the resource specified in the body of the request. If the intention is to modify a selection of properties in a resource but leave other properties unchanged, then this should be implemented by using an HTTP PATCH request. However, many RESTful implementations relax this rule and use PUT for both situations.
 
-## Processing HTTP requests
+### Processing HTTP requests
 The data included by a client application in many HTTP requests, and the corresponding response messages from the web server, could be presented in a variety of formats. For example, the data that specifies the details for a customer or order could be provided as XML, JSON, or some other encoded and compressed format. A RESTful web API should support different formats as requested by the client application that submits a request.
 
 When a client application sends a request that returns data in the body of a message, it can specify the formats it can handle in the Accept header of the request. The following code illustrates an HTTP GET request that retrieves the details of customer 1 and expects the result to be returned as JSON:
@@ -254,7 +254,7 @@ If the resource is not found, the web server should return a 404 (Not Found) mes
 
 > **Tip**: If all the resources in a collection need to be deleted, enable an HTTP DELETE request to be specified for the URI of the collection rather than forcing an application to remove each resource in turn from the collection.
 
-## Filtering and paginating data
+### Filtering and paginating data
 
 An important principal of the RESTful approach is to keep the URIs simple and intuitive. Exposing a collection of resources through a single URI assists in this respect, but it can lead to applications fetching large amounts of data when only a subset of the information is required. Generating a large volume of traffic impacts not only the performance and scalability of the web server but also adversely affect the responsiveness of client applications requesting the data.
 
@@ -274,7 +274,7 @@ You can extend this approach to limit (project) the fields returned if a single 
 
 > **Tip**: Give all optional parameters in query strings meaningful defaults. For example, set the _limit_ parameter to 10 and the _offset_ parameter to 0 if you implement pagination, set the sort parameter to the key of the resource if you implement ordering, and set the _fields_ parameter to all fields in the resource if you support projections.
 
-## Handling large binary resources
+### Handling large binary resources
 A single resource may contain large binary fields, such as files or images. To overcome the transmission problems caused by unreliable and intermittent connections and to improve response times, consider providing operations that enable such resources to be retrieved in chunks by the client application. To do this, the web API should support the Accept-Ranges header for GET requests for large resources, and ideally implement HTTP HEAD requests for these resources. The Accept-Ranges header indicates that the GET operation supports partial results, and that a client application can submit GET requests that return a subset of a resource specified as a range of bytes. A HEAD request is similar to a GET request except that it only returns a header that describes the resource and an empty message body. A client application can issue a HEAD request to determine whether to fetch a resource by using partial GET requests. The following example shows a HEAD request that obtains information about a product image:
 
 ```HTTP
@@ -379,7 +379,7 @@ It is highly unlikely that in all but the simplest of situations that a web API 
 
 Versioning enables a web API to indicate the features and resources that it exposes, and a client application can submit requests that are directed to a specific version of a feature or resource. The following sections describe several different approaches, each of which has its own benefits and trade-offs.
 
-## No versioning
+### No versioning
 This is the simplest approach, and may be acceptable for some internal APIs. Big changes could be represented as new resources or new links.  Adding content to existing resources might not present a breaking change as client applications that are not expecting to see this content will simply ignore it.
 
 For example, a request to the URI _http://adventure-works.com/customers/3_ should return the details of a single customer containing _Id_, _Name_, and _Address_ fields expected by the client application:
@@ -408,7 +408,7 @@ Content-Length: ...
 
 Existing client applications might continue functioning correctly if they are capable of ignoring unrecognized fields, while new client applications can be designed to handle this new field. However, if more radical changes to the schema of resources occur (such as removing or renaming fields) or the relationships between resources change then these may constitute breaking changes that prevent existing client applications from functioning correctly. In these situations you should consider one of the following approaches.
 
-## URI versioning
+### URI versioning
 Each time you modify the web API or change the schema of resources, you add a version number to the URI for each resource. The previously existing URIs should continue to operate as before, returning resources that conform to their original schema.
 
 Extending the previous example, if the _Address_ field is restructured into sub-fields containing each constituent part of the address (such as _StreetAddress_, _City_, _State_, and _ZipCode_), this version of the resource could be exposed through a URI containing a version number, such as http://adventure-works.com/v2/customers/3:
@@ -424,14 +424,14 @@ Content-Length: ...
 
 This versioning mechanism is very simple but depends on the server routing the request to the appropriate endpoint. However, it can become unwieldy as the web API matures through several iterations and the server has to support a number of different versions. Also, from a purist’s point of view, in all cases the client applications are fetching the same data (customer 3), so the URI should not really be different depending on the version. This scheme also complicates implementation of HATEOAS as all links will need to include the version number in their URIs.
 
-## Query string versioning
+### Query string versioning
 Rather than providing multiple URIs, you can specify the version of the resource by using a parameter within the query string appended to the HTTP request, such as _http://adventure-works.com/customers/3?version=2_. The version parameter should default to a meaningful value such as 1 if it is omitted by older client applications.
 
 This approach has the semantic advantage that the same resource is always retrieved from the same URI, but it depends on the code that handles the request to parse the query string and send back the appropriate HTTP response. This approach also suffers from the same complications for implementing HATEOAS as the URI versioning mechanism.
 
 > **Note**: Some older web browsers and web proxies will not cache responses for requests that include a query string in the URL. This can have an adverse impact on performance for web applications that use a web API and that run from within such a web browser.
 
-## Header versioning
+### Header versioning
 Rather than appending the version number as a query string parameter, you could implement a custom header that indicates the version of the resource. This approach requires that the client application adds the appropriate header to any requests, although the code handling the client request could use a default value (version 1) if the version header is omitted. The following examples utilize a custom header named _Custom-Header_. The value of this header indicates the version of web API.
 
 Version 1:
@@ -472,7 +472,7 @@ Content-Length: ...
 
 Note that as with the previous two approaches, implementing HATEOAS requires including the appropriate custom header in any links.
 
-## Media type versioning
+### Media type versioning
 When a client application sends an HTTP GET request to a web server it should stipulate the format of the content that it can handle by using an Accept header, as described earlier in this guidance. Frequently the purpose of the Accept header is to allow the client application to specify whether the body of the response should be XML, JSON, or some other common format that the client can parse. However, it is possible to define custom media types that include information enabling the client application to indicate which version of a resource it is expecting. The following example shows a request that specifies an Accept header with the value _application/vnd.adventure-works.v1+json_. The _vnd.adventure-works.v1_ element indicates to the web server that it should return version 1 of the resource, while the _json_ element specifies that the format of the response body should be JSON:
 
 ```HTTP
