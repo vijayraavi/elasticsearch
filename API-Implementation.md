@@ -1,8 +1,35 @@
+
 ![](http://pnp.azurewebsites.net/images/pnp-logo.png)
 
 # API implementation guidance
 
-Some topics in this guidance are under debate and changing in the future. We welcome your feedback!
+Some topics in this guidance are under discussion and may change in the future. We welcome your feedback!
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [API implementation guidance](#api-implementation-guidance)
+- [Overview](#overview)
+- [Considerations for implementing a RESTful web API](#considerations-for-implementing-a-restful-web-api)
+  - [Considerations for implementing request routing](#considerations-for-implementing-request-routing)
+  - [Considerations for processing requests](#considerations-for-processing-requests)
+  - [Considerations for handling exceptions](#considerations-for-handling-exceptions)
+  - [Considerations for optimizing client-side data access](#considerations-for-optimizing-client-side-data-access)
+  - [Considerations for handling large requests and responses](#considerations-for-handling-large-requests-and-responses)
+  - [Considerations for maintaining responsiveness, scalability, and availability](#considerations-for-maintaining-responsiveness-scalability-and-availability)
+  - [Considerations for publishing and managing a web API](#considerations-for-publishing-and-managing-a-web-api)
+  - [Publishing a web API by using the Azure API Management Service](#publishing-a-web-api-by-using-the-azure-api-management-service)
+  - [Supporting developers building client applications](#supporting-developers-building-client-applications)
+    - [Documenting the REST operations for a web API](#documenting-the-rest-operations-for-a-web-api)
+    - [Implementing a client SDK](#implementing-a-client-sdk)
+  - [Managing and monitoring a web API](#managing-and-monitoring-a-web-api)
+    - [Monitoring a web API directly](#monitoring-a-web-api-directly)
+    - [Monitoring a web API through the API Management Service](#monitoring-a-web-api-through-the-api-management-service)
+- [Considerations for testing a web API](#considerations-for-testing-a-web-api)
+- [Related patterns](#related-patterns)
+- [More information](#more-information)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Overview
 A carefully-designed RESTful web API defines the resources, relationships, and navigation schemes that are accessible to client applications. When you implement and deploy a web API, you should consider the physical requirements of the environment hosting the web API and the way in which the web API is constructed rather than the logical structure of the data. This guidance focusses on best practices for implementing a web API and publishing it to make it available to client applications. Security concerns are described separately in the API Security Guidance document. You can find detailed information about web API design in the API Design Guidance document.
@@ -155,13 +182,13 @@ Once a request from a client application has been successfully routed to a metho
 
 - **GET, PUT, DELETE, HEAD, and PATCH actions should be idempotent**.
 
-	The code that implements these requests should not impose any side-effects. The same request repeated over the same resource should have the same result.
+	The code that implements these requests should not impose any side-effects. The same request repeated over the same resource should result in the same state. For example, sending multiple DELETE requests to the same URI should have the same effect, although the HTTP status code in the response messages may be different (the first DELETE request might return status code 204 (No Content) while a subsequent DELETE request might return statis code 404 (Not Found)).
 
 > **Note**: The article [Idempotency Patterns](http://blog.jonathanoliver.com/idempotency-patterns/) on Jonathan Oliver’s blog provides an overview of idempotency and how it relates to data management operations.
 
 - **POST actions that create new resources should do so without unrelated side-effects**.
 
-	If a POST request is intended to create a new resource, the effects of the request should be limited to the new resource (and possibly any directly related resources if there is some sort of linkage involved, such as permissions or a master/detail relationship). In this case, the request should not modify unrelated resources or have any other side-effects on the overall state of the system.
+	If a POST request is intended to create a new resource, the effects of the request should be limited to the new resource (and possibly any directly related resources if there is some sort of linkage involved) For example, in an ecommerce system, a POST request that creates a new order for a customer might also amend inventory levels and generate billing information, but it should not modify information not directly related to the order or have any other side-effects on the overall state of the system.
 
 - **Avoid implementing chatty POST, PUT, and DELETE operations**.
 
@@ -392,7 +419,7 @@ In a distributed environment such as that involving a web server and client appl
 
 - **Support client-side caching**.
 
-	The HTTP 1.1 protocol supports caching in clients and intermediate servers through wich a request is routed by the use of the Cache-Control header. When a client application sends an HTTP GET request to the web API, the response can include a Cache-Control header that indicates whether the data in the body of the response can be safely cached by the client or an intermediate server through which the request has been routed, and for how long before it should expire and be considered out-of-date. The following example shows an HTTP GET request and the corresponding response that includes a Cache-Control header:
+	The HTTP 1.1 protocol supports caching in clients and intermediate servers through which a request is routed by the use of the Cache-Control header. When a client application sends an HTTP GET request to the web API, the response can include a Cache-Control header that indicates whether the data in the body of the response can be safely cached by the client or an intermediate server through which the request has been routed, and for how long before it should expire and be considered out-of-date. The following example shows an HTTP GET request and the corresponding response that includes a Cache-Control header:
 
 	```HTTP
 	GET http://adventure-works.com/orders/2 HTTP/1.1
@@ -898,7 +925,7 @@ There may be occasions when a client application needs to issue requests that se
 	sp.Expect100Continue = false;
 	```
 
-	For more information, see the [ServicePoint Class](https://msdn.microsoft.com/library/system.net.servicepoint.aspx) page on the Microsoft website.
+	You can also set the static _Expect100Continue_ property of the _ServicePointManager_ class to specify the default value of this property for all subsequently created _ServicePoint_ objects. For more information, see the [ServicePoint Class](https://msdn.microsoft.com/library/system.net.servicepoint.aspx) page on the Microsoft website.
 
 - **Support pagination for requests that may return large numbers of objects**.
 
@@ -1046,7 +1073,23 @@ Building a client application that invokes REST requests to access a web API req
 
 Creating a client-side SDK is a considerable undertaking as it has to be implemented consistently and tested carefully. However, much of this process can be made mechanical, and many vendors supply tools that can automate many of these tasks.
 
-## Monitoring and managing a web API
+## Managing and monitoring a web API
+
+A web API is typically implemented as a service deployed across one or more web servers. Client applications send HTTP requests to the web server which routes them to the appropriate operation. However, rather than providing direct access to the web API and web server for client applications, it may be advantageous to route all requests through a separate service that acts as a façade and that forwards requests to the web server. This organization provides several advantages, including:
+
+- Decoupling security concerns from the web API. The façade can take responsibility for authenticating and authorizing requests. The authentication process can be implemented and configured independently from the web API. The façade can enforce access control and act as a filter for poison message attacks. The web server hosting the web API can be protected behind a firewall that only permits traffic to and from the façade.
+- Regulating the traffic to the web API, throttling or temporarily blocking requests during periods of high demand, and possibly limit the volume of requests that come from a single source (or set of sources). In this way, the façade can help to ensure that throughput meets agreed quality of service parameters, and it can also help to reduce the effects of DDOS attacks.
+- Metering the volume of traffic, which can aid scalability by helping to establish whether to start and stop additional instances of the web server hosting the web API.
+- Implementing tiered SLAs (for high value customers), routing traffic to specific high-performance servers based on policy and business agreements for availability.
+- Providing a point for logging requests both for debugging and auditing purposes.
+- Health monitoring. The façade can periodically ping the web server and if it fails to respond it can arrange for the web server to be restarted.
+- Composing or aggregating multiple web APIs into a single point of access. The façade can route requests to different web servers each of which implement different web APIs. Client applications see the façade as a single source and are not necessarily aware of how the web APIs are partitioned.
+- Transforming messages. The façade can modify messages and convert them into a different format before passing them to the web API. This feature can enable the structure of the web API to be minimized while reducing the impact on existing client applications.
+- Translating communications protocols. The façade can convert RESTful HTTP requests into different formats (such as SOAP) and forward them on to a web API if that web API does not understand raw HTTP messages. Response messages from the web API can be translated back into RESTful HTTP responses. Similarly, if the client application does not send RESTful HTTP requests, the façade can convert these messages into HTTP requests before forwarding them to the web API.
+- Caching requests and responses. The façade can implement a caching mechanism that recognizes repeated requests and provides responses without invoking the corresponding web API. Note that this mechanism requires careful configuration to prevent multiple copies of the same data being cached by the façade if the web server implements versioning, as described at the end of the previous section.
+
+> **Note**: Microsoft Azure provides the API Management Service, available at [http://azure.microsoft.com/en-us/documentation/services/api-management](http://azure.microsoft.com/en-us/documentation/services/api-management/) which can implement many of these features.
+
 Depending on how you have published and deployed your web API you can monitor the web API directly, or you can gather usage and health information by analyzing the traffic that passes through the API Management service.
 
 ### Monitoring a web API directly
