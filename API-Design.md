@@ -6,7 +6,7 @@ Some topics in this guidance are under discussion and may change in the future. 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents**
 
   - [Overview](#overview)
   - [Introduction to Representational State Transfer (REST)](#introduction-to-representational-state-transfer-rest)
@@ -23,7 +23,7 @@ Some topics in this guidance are under discussion and may change in the future. 
     - [Query string versioning](#query-string-versioning)
     - [Header versioning](#header-versioning)
     - [Media type versioning](#media-type-versioning)
-- [More information](#more-information)
+  - [More information](#more-information)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -96,9 +96,9 @@ Individual entities rarely exist in isolation (although some singleton objects m
 
 > **Tip**: Adopt a consistent naming convention in URIs; in general it helps to use plural nouns for URIs that reference collections and single nouns for URIs that reference individual items.
 
-You also need to consider the relationships between different types of resources and how you might expose these associations. For example, customers may place zero or more orders. A natural way to represent this relationship would be through a URI such as _/customers/5/orders_ to find all the orders for customer 5. You might also consider representing the association from an order back to a specific customer through a URI such as _/orders/99/customer_ to find the customer for order 99, but extending this model too far can become cumbersome to implement. A better solution is to provide navigable links to associated resources, such as the customer, in the body of the HTTP response message returned when the order is queried. This mechanism is described in more detail in the section [Using the HATEOAS Approach to Enable Navigation To Related Resources](#using-the-hateoas-approach-to-enable-navigation-to-related-resources) later in this guidance.
+You also need to consider the relationships between different types of resources and how you might expose these associations. For example, customers may place zero or more orders. A natural way to represent this relationship would be through a URI such as _/customers/5/orders_ to find all the orders for customer 5. You might also consider representing the association from an order back to a specific customer through a URI such as _/orders/99/customer_ to find the customer for order 99, but extending this model too far can become cumbersome to implement. A better solution is to provide navigable links to associated resources, such as the customer, in the body of the HTTP response message returned when the order is queried. This mechanism is described in more detail in the section Using the HATEOAS Approach to Enable Navigation To Related Resources later in this guidance.
 
-In more complex systems there may be many more types of entity, and it can be tempting to provide URIs that enable a client application to navigate through several levels of relationships, such as _/customers/1/orders/99/products_ to obtain the list of products in order 99 placed by customer 1. However, this level of complexity can be difficult to maintain and is inflexible if the relationships between resources change in the future. Rather, you should seek to keep queries relatively simple. Bear in mind that once an application has a reference to a resource, it should be possible to use this reference to find items related to that resource. The preceding query can be replaced with the URI _/customers/1/orders_ to find all the orders for customer 1, and then query the URI _/orders/99/products_ to find the products in this order (assuming order 99 was placed by customer 1). This is the approach described in more detail in the section [Using the HATEOAS Approach to Enable Navigation to Related Resources](#using-the-hateoas-approach-to-enable-navigation-to-related-resources) later in this document.
+In more complex systems there may be many more types of entity, and it can be tempting to provide URIs that enable a client application to navigate through several levels of relationships, such as _/customers/1/orders/99/products_ to obtain the list of products in order 99 placed by customer 1. However, this level of complexity can be difficult to maintain and is inflexible if the relationships between resources change in the future. Rather, you should seek to keep queries relatively simple. Bear in mind that once an application has a reference to a resource, it should be possible to use this reference to find items related to that resource. The preceding query can be replaced with the URI _/customers/1/orders_ to find all the orders for customer 1, and then query the URI _/orders/99/products_ to find the products in this order (assuming order 99 was placed by customer 1).
 
 Another point to consider is that all web requests impose a load on the web server, and the greater the number of requests the bigger the load. You should attempt to define your resources to avoid “chatty” web APIs that expose a large number of small resources. Such an API may require a client application to submit multiple requests to find all the data that it requires. It may be beneficial to denormalize data and combine related information together into bigger resources that can be retrieved by issuing a single request. However, you need to balance this approach against the overhead of fetching data that might not be frequently required by the client. Retrieving large objects can increase the latency of a request and incur additional bandwidth costs for little advantage if the additional data is not often used.
 
@@ -112,18 +112,20 @@ Finally, it might not be possible to map every operation implemented by a web AP
 
 The HTTP protocol defines a number of methods that assign semantic meaning to a request. The common HTTP methods used by most RESTful web APIs are:
 
-- GET, to retrieve a copy of the resource at the specified URI. The body of the response message contains the details of the requested resource.
-- POST, to create a new resource at the specified URI. The body of the request message provides the details of the new resource.
-- PUT, to replace or update the resource at the specified URI. The body of the request message specifies the resource to be modified and the values to be applied.
-- DELETE, to remove the resource at the specified URI.
+- **GET**, to retrieve a copy of the resource at the specified URI. The body of the response message contains the details of the requested resource.
+- **POST**, to create a new resource at the specified URI. The body of the request message provides the details of the new resource.
+- **PUT**, to replace or update the resource at the specified URI. The body of the request message specifies the resource to be modified and the values to be applied.
+- **DELETE**, to remove the resource at the specified URI.
 
 > **Note**: The HTTP protocol also defines other less commonly-used methods, such as PATCH which is used to request selective updates to a resource, HEAD which is used to request a description of a resource, OPTIONS which enables a client information to obtain information about the communication options supported by the server, and TRACE which allows a client to request information that it can use for testing and diagnostics purposes.
 
 The effect of a specific request should depend on whether the resource to which it is applied is a collection or an individual item. The following table summarizes the common conventions adopted by most RESTful implementations using the ecommerce example. Note that not all of these requests might be implemented; it depends on the specific scenario.
 
-| **Resource**                  | **POST**                                    | **GET**                                       | **PUT**                                                                              | **DELETE**                                                  |
-|---------------------------|-----------------------------------------|-------------------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------|
-| /customers<br /><br /><br />/customers/1<br /><br /><br /><br />/customers/1/orders<br /><br /> | Create a new<br />customer<br /><br />Error<br /><br /><br /><br />Create a new order<br />for customer 1 | Retrieve all<br />customers<br /><br />Retrieve the details<br />for customer 1<br /><br /><br />Retrieve all orders<br />for customer 1<br /> | Bulk update of<br />customers (_if<br />implemented_)<br />Update the details of<br />customer 1 if it<br />exists, otherwise<br />return an error<br />Bulk update of<br />orders for customer 1<br />(if implemented) | Remove all<br />customers (_if<br />implemented_)<br />Remove customer 1<br /><br /><br /><br />Remove all orders<br />for customer 1<br />(_if implemented_) |
+| **Resource** | **POST** | **GET** | **PUT** | **DELETE** |
+|--------------|----------|---------|---------|------------|
+| /customers | Create a new customer | Retrieve all customers | Bulk update of customers (_if implemented_) | Remove all customers |
+| /customers/1 | Error | Retrieve the details for customer 1 | Update the details of customer 1 if it exists, otherwise return an error | Remove customer 1 |
+| /customers/1/orders | Create a new order for customer 1 | Retrieve all orders for customer 1 | Bulk update of orders for customer 1 (_if implemented_) | Remove all orders for customer 1(_if implemented_) |
 
 The purpose of GET and DELETE requests are relatively straightforward, but there is scope for confusion concerning the purpose and effects of POST and PUT requests.
 

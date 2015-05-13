@@ -7,7 +7,7 @@ Some topics in this guidance are under discussion and may change in the future. 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents**
 
 - [Overview](#overview)
 - [Considerations for implementing a RESTful web API](#considerations-for-implementing-a-restful-web-api)
