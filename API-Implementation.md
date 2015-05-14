@@ -150,26 +150,6 @@ In a service implemented by using the ASP.NET Web API, each request is routed to
 
 	If you are using convention-based routing, indicate methods that do not correspond to HTTP actions by decorating them with the _NonAction_ attribute. This typically applies to helper methods defined for use by other methods within a controller, and this attribute will prevent these methods from being matched and invoked by an errant HTTP request.
 
-- **Consider using the OData protocol to route and filter requests**.
-
-	OData is a standard protocol for building data-based APIs that can follow RESTful conventions. OData supports a modified URI syntax for retrieving data, but provides significant facilities for filtering data and supporting common query options such as sorting, projecting, and selecting subsets of data. For example, if the Adventure-Works web API was implemented as an OData service, you could use the following URI to find the details for order number 99:
-
-	_http://www.adventure-works.com/api/orders(99)_
-
-	If you only wanted to find the value of the order (assuming that _orderValue_ is a field in the orders resource), you could issue the following HTTP GET request:
-
-	_http://www.adventure-works.com/api/orders(99)/orderValue_
-
-	You can also limit the orders returned by using a filter. The following request finds all orders with a value greater than 100:
-
-	_http://www.adventure-works.com/api/orders?$filter=orderValue gt 100_
-
-	OData also provides metadata describing the resources that the web API exposes. This information can be used by client applications to help parse the response from GET requests, and construct PUT, POST, and DELETE requests containing the appropriate fields. This metadata can also be used to generate client-side SDKs; this feature is discussed further in the section Considerations for Publishing and Managing a Web API later in this guidance.
-
-	The ASP.NET Web API framework directly supports the OData protocol. Visual Studio provides wizards that enable you to quickly generate a default OData controller that provides a skeleton set of methods to read and write a set of resources. You add your own business logic to access the data.
-
-	For more information about the OData protocol, visit the [Basic Tutorial](http://www.odata.org/getting-started/basic-tutorial/) page on the OData website. For examples showing how to implement an OData web API, visit the [ASP.NET Web API OData](http://www.asp.net/web-api/overview/odata-support-in-aspnet-web-api) page on the Microsoft website.
-
 - **Consider the benefits and tradeoffs of placing the API in a subdomain**.
 
 	By default, the ASP.NET web API organizes APIs into the _/api_ directory in a domain, such as _http://www.adventure-works.com/api/orders_. This directory resides in the same domain as any other services exposed by the same host. It may be beneficial to split the web API out into its own subdomain running on a separate host, with URIs such as _http://api.adventure-works.com/orders_. This separation enables you to partition and scale the web API more effectively without affecting any other web applications or services running in the _www.adventure-works.com_ domain.
@@ -221,7 +201,7 @@ Once a request from a client application has been successfully routed to a metho
 
 	If the POST operation is successful, the Web API framework creates an HTTP response with status code 200 (OK) and the details of the customer as the message body. However, in this case, according to the HTTP protocol, a POST operation should return status code 201 (Created) and the response message should include the URI of the newly created resource in the Location header of the response message.
 
-	To provide these features, return your own HTTP response message by using the _IHttpActionResult_ interface. This approach gives you fine control over the HTTP status code, the headers in the response message, and even the format of the data in the response message body, as shown in the following code example. This version of the _CreateNewCustomer_ method conforms more closely to the expectations of client following the HTTP protocol. The _Created_ method of the _ApiController_ class constructs the response message from the specified data, and adds the Location header to the results:
+	To provide these features, return your own HTTP response message by using the `IHttpActionResult` interface. This approach gives you fine control over the HTTP status code, the headers in the response message, and even the format of the data in the response message body, as shown in the following code example. This version of the `CreateNewCustomer` method conforms more closely to the expectations of client following the HTTP protocol. The `Created` method of the `ApiController` class constructs the response message from the specified data, and adds the Location header to the results:
 
 	```C#
 	public class CustomersController : ApiController
@@ -297,7 +277,7 @@ Once a request from a client application has been successfully routed to a metho
 	]}
 	```
 
-	In this example, the customer data is represented by the _Customer_ class shown in the following code snippet. The HATEOAS links are held in the _Links_ collection property:
+	In this example, the customer data is represented by the `Customer` class shown in the following code snippet. The HATEOAS links are held in the `Links` collection property:
 
 	```C#
 	public class Customer
@@ -317,15 +297,15 @@ Once a request from a client application has been successfully routed to a metho
 	}
 	```
 
-	The HTTP GET operation retrieves the customer data from storage and constructs a _Customer_ object, and then populates the _Links_ collection. The result is formatted as a JSON response message. Each link comprises the following fields:
+	The HTTP GET operation retrieves the customer data from storage and constructs a `Customer` object, and then populates the `Links` collection. The result is formatted as a JSON response message. Each link comprises the following fields:
 
-	- The relationship between the object being returned and the object described by the link. In this case "self" indicates that the link is a reference back to the object itself (similar to a _this_ pointer in many object-oriented languages), and "orders" is the name of a collection containing the related order information.
+	- The relationship between the object being returned and the object described by the link. In this case "self" indicates that the link is a reference back to the object itself (similar to a `this` pointer in many object-oriented languages), and "orders" is the name of a collection containing the related order information.
 
-	- The hyperlink (_HRef_) for the object being described by the link in the form of a URI.
+	- The hyperlink (`HRef`) for the object being described by the link in the form of a URI.
 
-	- The type of HTTP request (_Action_) that can be sent to this URI.
+	- The type of HTTP request (`Action`) that can be sent to this URI.
 
-	- The format of any data (_LinkedResourceMIMETypes_) that should be provided in the HTTP request or that can be returned in the response, depending on the type of the request.
+	- The format of any data (`LinkedResourceMIMETypes`) that should be provided in the HTTP request or that can be returned in the response, depending on the type of the request.
 
 	The HATEOAS links shown in the example HTTP response indicate that a client application can perform the following operations:
 
@@ -345,7 +325,8 @@ By default, in the ASP.NET Web API framework, if an operation throws an uncaught
 - **Capture exceptions and return a meaningful response to clients**.
 
 	The code that implements an HTTP operation should provide comprehensive exception handling rather than letting uncaught exceptions propagate to the Web API framework. If an exception makes it impossible to complete the operation successfully, the exception can be passed back in the response message, but it should include a meaningful description of the error that caused the exception. The exception should also include the appropriate HTTP status code rather than simply returning status code 500 for every situation. For example, if a user request causes a database update that violates a constraint (such as attempting to delete a customer that has outstanding orders), you should return status code 409 (Conflict) and a message body indicating the reason for the conflict. If some other condition renders the request unachievable, you can return status code 400 (Bad Request). You can find a full list of HTTP status codes on the [Status Code Definitions](http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html) page on the W3C website.
-The following code shows an example that traps different conditions and returns an appropriate response.
+
+	The following code shows an example that traps different conditions and returns an appropriate response.
 
 	```C#
 	[HttpDelete]
@@ -388,13 +369,13 @@ The following code shows an example that traps different conditions and returns 
 	}
 	```
 
-> **Tip**: Do not include information that could be useful to an attacker attempting to penetrate your web API.For further information, visit the [Exception Handling in ASP.NET Web API](http://www.asp.net/web-api/overview/error-handling/exception-handling) page on the Microsoft website.
+	> **Tip**: Do not include information that could be useful to an attacker attempting to penetrate your web API.For further information, visit the [Exception Handling in ASP.NET Web API](http://www.asp.net/web-api/overview/error-handling/exception-handling) page on the Microsoft website.
 
-> **Note**: Many web servers trap error conditions themselves before they reach the web API. For example, if you configure authentication for a web site and the user fails to provide the correct authentication information, the web server should respond with status code 401 (Unauthorized). Once a client has been authenticated, your code can perform its own checks to verify that the client should be able access the requested resource. If this authorization fails, you should return status code 403 (Forbidden).
+	> **Note**: Many web servers trap error conditions themselves before they reach the web API. For example, if you configure authentication for a web site and the user fails to provide the correct authentication information, the web server should respond with status code 401 (Unauthorized). Once a client has been authenticated, your code can perform its own checks to verify that the client should be able access the requested resource. If this authorization fails, you should return status code 403 (Forbidden).
 
 - **Handle exceptions in a consistent manner and log information about errors**.
 
-	To handle exceptions in a consistent manner, consider implementing a global error handling strategy across the entire web API. You can achieve part of this by creating an exception filter that runs whenever a controller throws any unhandled exception that is not an _HttpResponseException_ exception. This approach is described on the [Exception Handling in ASP.NET Web API](http://www.asp.net/web-api/overview/error-handling/exception-handling) page on the Microsoft website.
+	To handle exceptions in a consistent manner, consider implementing a global error handling strategy across the entire web API. You can achieve part of this by creating an exception filter that runs whenever a controller throws any unhandled exception that is not an `HttpResponseException` exception. This approach is described on the [Exception Handling in ASP.NET Web API](http://www.asp.net/web-api/overview/error-handling/exception-handling) page on the Microsoft website.
 
 	However, there are several situations where an exception filter will not catch an exception, including:
 
@@ -465,7 +446,7 @@ In a distributed environment such as that involving a web server and client appl
 	}
 	```
 
-	This code makes use of a custom _IHttpActionResult_ class named _OkResultWithCaching_. This class enables the controller to set the cache header contents:
+	This code makes use of a custom `IHttpActionResult` class named `OkResultWithCaching`. This class enables the controller to set the cache header contents:
 	
 	```C#
 	public class OkResultWithCaching<T> : OkNegotiatedContentResult<T>
@@ -503,7 +484,7 @@ In a distributed environment such as that involving a web server and client appl
 
 - **Provide ETags to Optimize Query Processing**.
 
-	When a client application retrieves an object, the response message can also include an _ETag_ (Entity Tag). An ETag is an opaque string that indicates the version of a resource; each time a resource changes the Etag is also modified. This ETag should be cached as part of the data by the client application. The following code example shows how to add an ETag as part of the response to an HTTP GET request. This code uses the _GetHashCode_ method of an object to generate a numeric value that identifies the object (you can override this method if necessary and generate your own hash using an algorithm such as MD5) :
+	When a client application retrieves an object, the response message can also include an _ETag_ (Entity Tag). An ETag is an opaque string that indicates the version of a resource; each time a resource changes the Etag is also modified. This ETag should be cached as part of the data by the client application. The following code example shows how to add an ETag as part of the response to an HTTP GET request. This code uses the `GetHashCode` method of an object to generate a numeric value that identifies the object (you can override this method if necessary and generate your own hash using an algorithm such as MD5) :
 
 	```C#
 	public class OrdersController : ApiController
@@ -567,7 +548,7 @@ In a distributed environment such as that involving a web server and client appl
 
 	> **Note**: If the response header contains the Cache-Control header no-store then the object should always be removed from the cache regardless of the HTTP status code.
 
-	The code below shows the _FindOrderByID_ method extended to support the If-None-Match header. Notice that if the If-None-Match header is omitted, the specified order is always retrieved:
+	The code below shows the `FindOrderByID` method extended to support the If-None-Match header. Notice that if the If-None-Match header is omitted, the specified order is always retrieved:
 
 	```C#
 	public class OrdersController : ApiController
@@ -636,7 +617,7 @@ In a distributed environment such as that involving a web server and client appl
     }
 	```
 
-	This example incorporates an additional custom _IHttpActionResult_ class named _EmptyResultWithCaching_. This class simply acts as a wrapper around an _HttpResponseMessage_ object that does not contain a response body:
+	This example incorporates an additional custom `IHttpActionResult` class named `EmptyResultWithCaching`. This class simply acts as a wrapper around an `HttpResponseMessage` object that does not contain a response body:
 
 	```C#
     public class EmptyResultWithCaching : IHttpActionResult
@@ -769,7 +750,7 @@ There may be occasions when a client application needs to issue requests that se
 
 	Some resources may be large objects or include large fields, such as graphics images or other types of binary data. A web API should support streaming to enable optimized uploading and downloading of these resources.
 
-	The HTTP protocol provides the chunked transfer encoding mechanism to stream large data objects back to a client. When the client sends an HTTP GET request for a large object, the web API can send the reply back in piecemeal _chunks_ over an HTTP connection. The length of the data in the reply may not be known initially (it might be generated), so the server hosting the web API should send a response message with each chunk that specifies the Transfer-Encoding: Chunked header rather than a Content-Length header. The client application can receive each chunk in turn to build up the complete response. The data transfer completes when the server sends back a final chunk with zero size.	You can implement chunking in the ASP.NET Web API by using the _PushStreamContent_ class. 
+	The HTTP protocol provides the chunked transfer encoding mechanism to stream large data objects back to a client. When the client sends an HTTP GET request for a large object, the web API can send the reply back in piecemeal _chunks_ over an HTTP connection. The length of the data in the reply may not be known initially (it might be generated), so the server hosting the web API should send a response message with each chunk that specifies the Transfer-Encoding: Chunked header rather than a Content-Length header. The client application can receive each chunk in turn to build up the complete response. The data transfer completes when the server sends back a final chunk with zero size.	You can implement chunking in the ASP.NET Web API by using the `PushStreamContent` class. 
 
 	The following example shows an operation that responds to HTTP GET requests for product images:
 
@@ -807,9 +788,9 @@ There may be occasions when a client application needs to issue requests that se
 	}
 	```
 
-	In this example, _ConnectBlobToContainer_ is a helper method that connects to a specified container (name not shown) in Azure Blob storage. _BlobExists_ is another helper method that returns a Boolean value that indicates whether a blob with the specified name exists in the blob storage container.
+	In this example, `ConnectBlobToContainer` is a helper method that connects to a specified container (name not shown) in Azure Blob storage. `BlobExists` is another helper method that returns a Boolean value that indicates whether a blob with the specified name exists in the blob storage container.
 
-	Each product has its own image held in blob storage. The _FileDownloadResult_ class is a custom _IHttpActionResult_ class that uses a _PushStreamContent_ object to read the image data from appropriate blob and transmit it asynchronously as the content of the response message:
+	Each product has its own image held in blob storage. The `FileDownloadResult` class is a custom `IHttpActionResult` class that uses a `PushStreamContent` object to read the image data from appropriate blob and transmit it asynchronously as the content of the response message:
 
 	```C#
 	public class FileDownloadResult : IHttpActionResult
@@ -840,7 +821,7 @@ There may be occasions when a client application needs to issue requests that se
     }
 	```
 
-	You can also apply streaming to upload operations if a client needs to POST a new resource that includes a large object. The next example shows the Post method for the _ProductImages_ controller. This method enables the client to upload a new product image:
+	You can also apply streaming to upload operations if a client needs to POST a new resource that includes a large object. The next example shows the Post method for the `ProductImages` controller. This method enables the client to upload a new product image:
 
 	```C#
 	public class ProductImagesController : ApiController
@@ -877,7 +858,7 @@ There may be occasions when a client application needs to issue requests that se
 	}
 	```
 
-	This code uses another custom _IHttpActionResult_ class called _FileUploadResult_. This class contains the logic for uploading the data asynchronously:
+	This code uses another custom `IHttpActionResult` class called `FileUploadResult`. This class contains the logic for uploading the data asynchronously:
 
 	```C#
     public class FileUploadResult : IHttpActionResult
@@ -917,7 +898,7 @@ There may be occasions when a client application needs to issue requests that se
 
 	If you are hosting a service by using IIS, the HTTP.sys driver automatically detects and handles Expect: 100-Continue headers before passing requests to your web application. This means that you are unlikely to see these headers in your application code, and you can assume that IIS has already filtered any messages that it deems to be unfit or too large.
 
-	If you are building client applications by using the .NET Framework, then all POST and PUT messages will first send messages with Expect: 100-Continue headers by default. As with the server-side, the process is handled transparently by the .NET Framework. However, this process results in each POST and PUT request causing 2 round-trips to the server, even for small requests. If your application is not sending requests with large amounts of data, you can disable this feature by using the _ServicePointManager_ class to create _ServicePoint_ objects in the client application. A _ServicePoint_ object handles the connections that the client makes to a server based on the scheme and host fragments of URIs that identify resources on the server. You can then set the _Expect100Continue_ property of the _ServicePoint_ object to false. All subsequent POST and PUT requests made by the client through a URI that matches the scheme and host fragments of the _ServicePoint_ object will be sent without Expect: 100-Continue headers. The following code shows how to configure a _ServicePoint_ object that configures all requests sent to URIs with a scheme of `http` and a host of `www.contoso.com`.
+	If you are building client applications by using the .NET Framework, then all POST and PUT messages will first send messages with Expect: 100-Continue headers by default. As with the server-side, the process is handled transparently by the .NET Framework. However, this process results in each POST and PUT request causing 2 round-trips to the server, even for small requests. If your application is not sending requests with large amounts of data, you can disable this feature by using the `ServicePointManager` class to create `ServicePoint` objects in the client application. A `ServicePoint` object handles the connections that the client makes to a server based on the scheme and host fragments of URIs that identify resources on the server. You can then set the `Expect100Continue` property of the `ServicePoint` object to false. All subsequent POST and PUT requests made by the client through a URI that matches the scheme and host fragments of the `ServicePoint` object will be sent without Expect: 100-Continue headers. The following code shows how to configure a `ServicePoint` object that configures all requests sent to URIs with a scheme of `http` and a host of `www.contoso.com`.
 
 	```C#
 	Uri uri = new Uri("http://www.contoso.com/");
@@ -925,13 +906,13 @@ There may be occasions when a client application needs to issue requests that se
 	sp.Expect100Continue = false;
 	```
 
-	You can also set the static _Expect100Continue_ property of the _ServicePointManager_ class to specify the default value of this property for all subsequently created _ServicePoint_ objects. For more information, see the [ServicePoint Class](https://msdn.microsoft.com/library/system.net.servicepoint.aspx) page on the Microsoft website.
+	You can also set the static `Expect100Continue` property of the `ServicePointManager` class to specify the default value of this property for all subsequently created `ServicePoint` objects. For more information, see the [ServicePoint Class](https://msdn.microsoft.com/library/system.net.servicepoint.aspx) page on the Microsoft website.
 
 - **Support pagination for requests that may return large numbers of objects**.
 
 	If a collection contains a large number of resources, issuing a GET request to the corresponding URI could result in significant processing on the server hosting the web API affecting performance, and generate a significant amount of network traffic resulting in increased latency.
 
-	To handle these cases, the web API should support query strings that enable the client application to refine requests or fetch data in more manageable, discrete blocks (or pages). The ASP.NET Web API framework parses query strings and splits them up into a series of parameter/value pairs which are passed to the appropriate method, following the routing rules described earlier. The method should be implemented to accept these parameters using the same names specified in the query string. Additionally, these parameters should be optional (in case the client omits the query string from a request) and have meaningful default values. The code below shows the _GetAllOrders_ method in the _Orders_ controller. This method retrieves the details of orders. If this method was unconstrained, it could conceivably return a large amount of data. The _limit_ and _offset_ parameters are intended to reduce the volume of data to a smaller subset, in this case only the first 10 orders by default:
+	To handle these cases, the web API should support query strings that enable the client application to refine requests or fetch data in more manageable, discrete blocks (or pages). The ASP.NET Web API framework parses query strings and splits them up into a series of parameter/value pairs which are passed to the appropriate method, following the routing rules described earlier. The method should be implemented to accept these parameters using the same names specified in the query string. Additionally, these parameters should be optional (in case the client omits the query string from a request) and have meaningful default values. The code below shows the `GetAllOrders` method in the `Orders` controller. This method retrieves the details of orders. If this method was unconstrained, it could conceivably return a large amount of data. The `limit` and `offset` parameters are intended to reduce the volume of data to a smaller subset, in this case only the first 10 orders by default:
 
 	```C#
 	public class OrdersController : ApiController
@@ -953,8 +934,6 @@ There may be occasions when a client application needs to issue requests that se
 	A client application can issue a request to retrieve 30 orders starting at offset 50 by using the URI _http://www.adventure-works.com/api/orders?limit=30&offset=50_.
 
 	> **Tip**: Avoid enabling client applications to specify query strings that result in a URI that is more than 2000 characters long. Many web clients and servers cannot handle URIs that are this long.
-
-	If you are using the OData protocol support provided with the ASP.NET Web API you get this functionality built-in. The _$top_ query string parameter allows a client application to limit the number of items returned, while the _$skip_ parameter enables an application to specify an offset into a collection from where to start retrieving items. The URI _/orders?$skip=20&$top=10_ fetches 10 orders starting with the 20th order in the collection.
 
 <a name="considerations-for-maintaining-responsiveness"></a>
 ## Considerations for maintaining responsiveness, scalability, and availability
@@ -1028,8 +1007,6 @@ It is useful to be able to decouple these issues from the technical issues conce
 - Transforming messages and translating communications protocols for clients built by using varying technologies.
 - Caching requests and responses to reduce load on the server hosting the web API.
 
-<a name="publishing-a-web-API"></a>
-
 ## Considerations for testing a web API
 A web API should be tested as thoroughly as any other piece of software. You should consider creating unit tests to validate the functionality of each operation, as you would with any other type of application. For more information, see the page [Verifying Code by Using Unit Tests](https://msdn.microsoft.com/library/dd264975.aspx) on the Microsoft website.
 
@@ -1059,12 +1036,11 @@ The nature of a web API brings its own additional requirements to verify that it
 
 Watch out for unexpected response status codes in the 5xx range. These messages are usually reported by the host server to indicate that it was unable to fulfil a valid request.
 
-- Test the different request header combinations that a client application can specify and ensure that the web API returns the expected information in response messages. Examples of client request headers include:
-	- **Accept**. The format of the data in the body of the response should match the format specified by the client request. The Content-Type header of the response should specify the format of the data returned.
-	- **ETag** and **If-None-Match**. If the client application implements client-side caching it can provide these headers to indicate which version of an object it currently has in cache, and how the web API should handle the request. The section [Considerations for Optimizing Client-Side Data Access](#considerations-for-optimizing) earlier in this guidance describes how these requests should be handled.
-	- **Range**. If an operation supports partial responses (if a request can return a large amount of data, for example), verify that the operation respects any client Range headers and responds with the correct data and the appropriate Accept-Ranges, Content-Length, and Content-Range headers. The section [Considerations for Handling Large Requests and Responses](#considerations-for-handling-large) in this guidance provides more information on these requests.
+- Test the different request header combinations that a client application can specify and ensure that the web API returns the expected information in response messages. 
+
 - Test query strings. If an operation can take optional parameters (such as pagination requests), test the different combinations and order of parameters.
-- Verify that asynchronous operations complete successfully. If the web API supports streaming for requests that return large binary objects (such as video or audio), ensure that client requests are not blocked while the data is streamed. If the web API implements polling for long-running data modification operations, verify that that the operations report their status correctly as they proceed. For more information, see the section [Considerations for Maintaining Responsiveness, Scalability, and Availability](#considerations-for-maintaining-responsiveness) in this guidance.
+
+- Verify that asynchronous operations complete successfully. If the web API supports streaming for requests that return large binary objects (such as video or audio), ensure that client requests are not blocked while the data is streamed. If the web API implements polling for long-running data modification operations, verify that that the operations report their status correctly as they proceed.
 
 You should also create and run performance tests to check that the web API operates satisfactorily under duress. You can build a web performance and load test project by using Visual Studio Ultimate. For more information, see the page [Run performance tests on an application before a release](https://msdn.microsoft.com/library/dn250793.aspx) on the Microsoft website.
 
@@ -1073,16 +1049,21 @@ You should also create and run performance tests to check that the web API opera
 Azure provides the [API Management Service](http://azure.microsoft.com/en-us/documentation/services/api-management/) which you can use to publish and manage a web API. Using this facility, you can generate a service that acts a façade for one or more web APIs. The service is itself a scalable web service that you can create and configure by using the Azure Management portal. You can use this service to publish and manage a web API as follows:
 
 1. Deploy the web API to a website, Azure cloud service, or Azure virtual machine.
+
 2. Connect the API management service to the web API. Requests sent to the URL of the management API are mapped to URIs in the web API. The same API management service can route requests to more than one web API. This enables you to aggregate multiple web APIs into a single management service. Similarly, the same web API can be referenced from more than one API management service if you need to restrict or partition the functionality available to different applications.
 
 	> **Note**: The URIs in HATEOAS links generated as part of the response for HTTP GET requests should reference the URL of the API management service and not the web server hosting the web API.
+
 3. For each web API, specify the HTTP operations that the web API exposes together with any optional parameters that an operation can take as input. You can also configure whether the API management service should cache the response received from the web API to optimize repeated requests for the same data. Record the details of the HTTP responses that each operation can generate. This information is used to generate documentation for developers, so it is important that it is accurate and complete.
 
 	You can either define operations manually using the wizards provided by the Azure Management portal, or you can import them from a file containing the definitions in WADL or Swagger format.
+
 4. Configure the security settings for communications between the API management service and the web server hosting the web API. The API management service currently supports Basic authentication and mutual authentication using certificates, and OAuth 2.0 user authorization.
+
 5. Create a product. A product is the unit of publication; you add the web APIs that you previously connected to the management service to the product. When the product is published, the web APIs become available to developers.
 
 	> **Note**: Prior to publishing a product, you can also define user-groups that can access the product and add users to these groups. This gives you control over the developers and applications that can use the web API. If a web API is subject to approval, prior to being able to access it a developer must send a request to the product administrator. The administrator can grant or deny access to the developer. Existing developers can also be blocked if circumstances change.
+
 6.	Configure policies for each web API. Policies govern aspects such as whether cross-domain calls should be allowed, how to authenticate clients, whether to convert between XML and JSON data formats transparently, whether to restrict calls from a given IP range, usage quotas, and whether to limit the call rate. Policies can be applied globally across the entire product, for a single web API in a product, or for individual operations in a web API.
 
 You can find full details describing how to perform these tasks on the [API Management](http://azure.microsoft.com/en-us/services/api-management/) page on the Microsoft website. The Azure API Management Service also provides its own REST interface, enabling you to build a custom interface for simplifying the process of configuring a web API. For more information, visit the [Azure API Management REST API Reference](https://msdn.microsoft.com/library/azure/dn776326.aspx) page on the Microsoft website.
@@ -1093,14 +1074,18 @@ You can find full details describing how to perform these tasks on the [API Mana
 
 ## Supporting developers building client applications
 Developers constructing client applications typically require information on how to access the web API, and documentation concerning the parameters, data types, return types, and return codes that describe the different requests and responses between the web service and the client application.
+
 ### Documenting the REST operations for a web API
 The Azure API Management Service includes a developer portal that describes the REST operations exposed by a web API. When a product has been published it appears on this portal. Developers can use this portal to sign up for access; the administrator can then approve or deny the request. If the developer is approved, they are assigned a subscription key that is used to authenticate calls from the client applications that they develop. This key must be provided with each web API call otherwise it will be rejected.
 
 This portal also provides:
 
 - Documentation for the product, listing the operations that it exposes, the parameters required, and the different responses that can be returned. Note that this information is generated from the details provided in step 3 in the list in the section [Publishing a web API by using the Microsoft Azure API Management Service](#publishing-a-web-API).
+
 - Code snippets that show how to invoke operations from several languages, including JavaScript, C#, Java, Ruby, Python, and PHP.
+
 - A developers' console that enables a developer to send an HTTP request to test each operation in the product and view the results.
+
 - A page where the developer can report any issues or problems found.
 
 The Azure Management portal enables you to customize the developer portal to change the styling and layout to match the branding of your organization.
@@ -1118,11 +1103,17 @@ Depending on how you have published and deployed your web API you can monitor th
 If you have implemented your web API by using the ASP.NET Web API template (either as a Web API project or as a Web role in an Azure cloud service) and Visual Studio 2013, you can gather availability, performance, and usage data by using ASP.NET Application Insights. Application Insights is a package that transparently tracks and records information about requests and responses when the web API is deployed to the cloud; once the package is installed and configured, you don't need to amend any code in your web API to use it. When you deploy the web API to an Azure web site, all traffic is examined and the following statistics are gathered:
 
 - Server response time.
+
 - Number of server requests and the details of each request.
+
 - The top slowest requests in terms of average response time.
+
 - The details of any failed requests.
+
 - The number of sessions initiated by different browsers and user agents.
+
 - The most frequently viewed pages (primarily useful for web applications rather than web APIs).
+
 - The different user roles accessing the web API.
 
 You can view this data in real time from the Azure Management portal. You can also create webtests that monitor the health of the web API. A webtest sends a periodic request to a specified URI in the web API and captures the response. You can specify the definition of a successful response (such as HTTP status code 200), and if the request does not return this response you can arrange for an alert to be sent to an administrator. If necessary, the administrator can restart the server hosting the web API if it has failed.
@@ -1134,8 +1125,11 @@ The [Application Insights - Start monitoring your app's health and usage](http:/
 If you have published your web API by using the API Management service, the API Management page on the Azure Management portal contains a dashboard that enables you to view the overall performance of the service. The Analytics page enables you to drill down into the details of how the product is being used. This page contains the following tabs:
 
 - **Usage**. This tab provides information about the number of API calls made and the bandwidth used to handle these calls over time. You can filter usage details by product, API, and operation.
+
 - **Health**. This tab enables you view the outcome of API requests (the HTTP status codes returned), the effectiveness of the caching policy, the API response time, and the service response time. Again, you can filter health data by product, API, and operation.
+
 - **Activity**. This tab provides a text summary of the numbers of successful calls, failed called, blocked calls, average response time, and response times for each product, web API, and operation. This page also lists the number of calls made by each developer.
+
 - **At a glance**. This tab displays a summary of the performance data, including the developers responsible for making the most API calls, and the products, web APIs, and operations that received these calls.
 
 You can use this information to determine whether a particular web API or operation is causing a bottleneck, and if necessary scale the host environment and add more servers. You can also ascertain whether one or more applications are using a disproportionate volume of resources and apply the appropriate policies to set quotas and limit call rates.
