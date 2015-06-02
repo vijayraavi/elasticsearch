@@ -14,14 +14,13 @@ These documents focus on the essential aspects of architecting systems to make o
 
 ----------
 
+- **[API Design][APIDesign]** describes the issues that you should consider when designing a web API.
 
-- **[API Design][APIDesign]** describes the issues that you should consider when designing a web API..
-
-- **[API Implementation][APIImplementation]** focusses on best practices for implementing a web API and publishing it to make it available to client applications.
+- **[API Implementation][APIImplementation]** focuses on recommended practices for implementing a web API and publishing it to make it available to client applications.
 
 - **[Autoscaling Guidance][AutoscalingGuidance]** summarizes considerations for taking advantage of the elasticity of cloud-hosted environments while easing management overhead by reducing the need for an operator to continually monitor the performance of a system and make decisions about adding or removing resources.
 
-- **[Background Jobs Guidance][BackgroundJobsGuidance]** describes the options available, and best practices for implementing tasks that should be performed in the background, independently from any foreground or interactive operations.
+- **[Background Jobs Guidance][BackgroundJobsGuidance]** describes the available options and recommended practices for implementing tasks that should be performed in the background, independently from any foreground or interactive operations.
 
 - **[Content Delivery Network (CDN) Guidance][CDNGuidance]** provides general guidance and good practice for using the CDN to minimize the load on your applications, and maximize availability and performance.
 
@@ -35,10 +34,9 @@ These documents focus on the essential aspects of architecting systems to make o
 
 - **[Retry Service Specific Guidance][RetryServiceSpecificGuidance]** summarizes the retry mechanism features for the majority of Azure services, and includes information to help you use, adapt, or extend the retry mechanism for that service.
 
-- **[Scalability Checklist][ScalabilityChecklist]** summarizes best practices for designing and implementing scalable services and handling data management.
+- **[Scalability Checklist][ScalabilityChecklist]** summarizes recommended practices for designing and implementing scalable services and handling data management.
 
-- **[Availability Checklist][AvailabilityChecklist]** lists best practices for ensuring availability in an Azure application.
-
+- **[Availability Checklist][AvailabilityChecklist]** lists recommended practices for ensuring availability in an Azure application.
 
 ----------
 
