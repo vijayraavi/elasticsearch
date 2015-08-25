@@ -26,7 +26,7 @@
 ## Overview
 The Microsoft Azure Content Delivery Network (CDN) offers developers a global solution for delivering high-bandwidth content that is hosted in Azure. Using the CDN, you can cache publicly available objects loaded from Azure blob storage, a web application, virtual machine, or an application folder. The CDN cache can be held at strategic locations to provide maximum bandwidth for delivering content to users. The CDN is typically used for delivering static content such as images, style sheets, documents, files, client-side scripts, and HTML pages.
 
-You can also use the CDN as a cache for serving dynamic content, such as a PDF report or graph based on the specified inputs; if the same inputs are provided by different users the result should be the same.
+You can also use the CDN as a cache for serving dynamic content, such as a PDF report or graph based on specified inputs; if the same input values are provided by different users the result should be the same.
 
 The major advantages of using the CDN are lower latency and faster delivery of content to users irrespective of their geographical location in relation to the datacenter where the application is hosted.
 
@@ -106,7 +106,11 @@ You can utilize URL rewriting for resources such as scripts and other content to
 
 When using Azure storage blobs to hold content for the CDN, the URL of the resources in blobs is case sensitive for the container and blob name.
 
-When using Azure Web Sites, you specify the path to the CDN instance in the links to resources. For example, the following specifies an image file in the **Images** folder of the site that will be delivered through the CDN: &lt;img src="http://[your-cdn-instance].vo.msecnd.net/Images/image.jpg" /&gt;
+When using Azure Web Sites, you specify the path to the CDN instance in the links to resources. For example, the following specifies an image file in the **Images** folder of the site that will be delivered through the CDN:
+
+```XML
+<img src="http://[your-cdn-instance].vo.msecnd.net/Images/image.jpg" />
+```
 
 ### Deployment
 
