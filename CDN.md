@@ -4,24 +4,24 @@
 
 **Table of Contents**
 
-- [Overview](#)
-- [How and why the CDN is used](#)
-- [Challenges](#)
-- [General guidelines and good practices](#)
-	- [Origin](#)
-	- [Deployment](#)
-	- [Routing and versioning](#)
-	- [Cache control](#)
-	- [Security](#)
-	- [Custom domains](#)
-	- [CDN fallback](#)
-	- [SEO](#)
-	- [Monitoring and logging](#)
-	- [Cost implications](#)
-	- [Bundling and minification](#)
-- [Example code](#)
-	- [URL rewriting](#)
-- [More information](#)
+- [Overview](#overview)
+- [How and why the CDN is used](#how-and-why-the-cdn-is-used)
+- [Challenges](#chalenges)
+- [General guidelines and good practices](#general-guidelines-and-good-practices)
+	- [Origin](#origin)
+	- [Deployment](#deployment)
+	- [Routing and versioning](#routing-and-versioning)
+	- [Cache control](#cache-control)
+	- [Security](#security)
+	- [Custom domains](#custom-domains)
+	- [CDN fallback](#cdn-fallback)
+	- [Search engine optimisation](#search-engine-optimisation)
+	- [Monitoring and logging](#monitoring-and-logging)
+	- [Cost implications](#cost-implications)
+	- [Bundling and minification](#bundling-and-minification)
+- [Example code](#example-code)
+	- [URL rewriting](#url-rewriting)
+- [More information](#more-information)
 
 ## Overview
 The Microsoft Azure Content Delivery Network (CDN) offers developers a global solution for delivering high-bandwidth content that is hosted in Azure. Using the CDN, you can cache publicly available objects loaded from Azure blob storage, a web application, virtual machine, or an application folder. The CDN cache can be held at strategic locations to provide maximum bandwidth for delivering content to users. The CDN is typically used for delivering static content such as images, style sheets, documents, files, client-side scripts, and HTML pages.
@@ -170,7 +170,7 @@ If you use a *CNAME*, you cannot use SSL because the CDN uses its own single SSL
 
 You should consider how your application will cope with a failure or temporary unavailability of the CDN. Client applications may be able to use copies of the resources that were cached locally (on the client) during previous requests, or you can include code that detects failure and instead requests resources from the origin (the application folder or Azure blob container that holds the resources) if the CDN is unavailable.
 
-### SEO
+### Searcg engine optimisation
 
 If SEO is an important consideration in your application, perform the following tasks:
 
