@@ -38,6 +38,8 @@ These documents focus on the essential aspects of architecting systems to make o
 
 - **[Availability Checklist][AvailabilityChecklist]** lists recommended practices for ensuring availability in an Azure application.
 
+- **[Polyglot Solutions][PolyglotSolutions]** Assessment of data store capabilities for polyglot solutions.
+
 ----------
 
 **Note**. This documentation is oriented towards architects. You can find detailed code examples and implementation documentation on the [Azure website][AzureWebSite]. Additionally, the [Performance Optimization][PerformanceOptimization] site contains further guidance on how to design systems that are scalable and efficient under load.
@@ -60,3 +62,4 @@ These documents focus on the essential aspects of architecting systems to make o
 [RetryPolicies]: Retry-Policies.md
 [ScalabilityChecklist]: Scalability-checklist.md
 [AvailabilityChecklist]: availability-checklist.md
+[PolyglotSolutions]: Polyglot-Solutions.md
