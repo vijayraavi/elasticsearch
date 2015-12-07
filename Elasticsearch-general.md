@@ -35,7 +35,7 @@ When a document is added or modified, all write operations are performed on the 
 
 Figure 1 shows the essential aspects of an Elasticsearch cluster comprising three nodes. An index has been created that consists of two primary shards with two replicas for each shard (six shards in all).
 
-![](figures/ElasticsearchCluster1.png)
+![](figures/Elasticsearch/ElasticsearchCluster1.png)
 **Figure 1.**
 A simple Elasticsearch cluster comprising two primary nodes and two sets of replicas
 
@@ -92,7 +92,7 @@ http.enabled: false
 
 Data nodes can still communicate with other data nodes, client nodes, and dedicated master nodes on the same network by using Elasticsearch transport module (which uses TCP sockets to connect directly between nodes), but client applications can only connect to client nodes over HTTP. Figure 2 shows a topology comprising a mixture of dedicated master, client, and data nodes in an Elasticsearch cluster.
 
-![](figures/ElasticsearchCluster2.png)
+![](figures/Elasticsearch/ElasticsearchCluster2.png)
 **Figure 2.**
 An Elasticsearch cluster showing different types of nodes
 
@@ -132,7 +132,7 @@ var client = new ElasticsearchClient(config);
 
 > **Note**: You can use the [Azure Load Balancer](https://azure.microsoft.com/documentation/articles/load-balancer-overview/) to expose the cluster to the public Internet, or you can use an [internal load balancer](https://azure.microsoft.com/documentation/articles/load-balancer-internal-overview/) if the client applications and cluster are contained entirely within the same private virtual network (VNET).
 
-![](figures/ClientAppInstances.png)
+![](figures/Elasticsearch/ClientAppInstances.png)
 **Figure 3.**
 Client application instances connecting to an Elasticsearch cluster through the Azure Load Balancer
 
@@ -250,7 +250,7 @@ Elasticsearch enables a number of deployment topologies, designed to support dif
 
 Figure 4 illustrates a starting point for designing an Elasticsearch topology for the cloud based on Azure VMs.
 
-![](figures/StartingPoint.png)
+![](figures/Elasticsearch/StartingPoint.png)
 **Figure 4.**
 Suggested starting point for building an Elasticsearch cluster with Azure
 
@@ -268,7 +268,7 @@ Don’t spread nodes in a cluster across regions as this can impact the performa
 
 Using this mechanism, each cluster can contain the data that is most likely to be accessed by local client applications, but these clients can still access and modify remote data albeit with possible extended latency. Figure 5 shows an example of this topology. The tribe node in Cluster 1 is highlighted; the other clusters can also have tribe nodes although these are not shown on the diagram:
 
-![](figures/TribeNode.png)
+![](figures/Elasticsearch/TribeNode.png)
 **Figure 5.**
 A client application accessing multiple clusters through a tribe node
 
@@ -285,7 +285,7 @@ In this example, the client application connects to the tribe node in Cluster 1 
 
 Large-scale topologies comprising clusters of dedicated master, client, and data nodes might not be appropriate for every scenario. If you are building a small-scale production or development system, consider the 3-node cluster shown in Figure 6. Client applications connect directly to any available data node in the cluster. The cluster contains three shards labelled P1-P3 (to allow for growth) plus replicas labelled R1-R3. Using three nodes allows Elasticsearch to distribute the shards and replicas so that if any single node fails no data will be lost.
 
-![](figures/ThreeNodeCluster.png)
+![](figures/Elasticsearch/ThreeNodeCluster.png)
 **Figure 6.**
 A 3-node cluster with 3 shards and replicas
 
