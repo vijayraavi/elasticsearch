@@ -291,7 +291,7 @@ A 3-node cluster with 3 shards and replicas
 
 If you are running a development installation on a standalone machine you can configure a cluster with a single node that acts as master, client, and data storage. Alternatively, you can start multiple nodes running as a cluster on the same computer by starting more than one instance of Elasticsearch. Figure 7 shows an example.
 
-![](figures/DevelopmentConfiguration.png)
+![](figures/Elasticsearch/DevelopmentConfiguration.png)
 **Figure 7.**
 A development configuration running multiple Elasticsearch nodes on the same machine
 
