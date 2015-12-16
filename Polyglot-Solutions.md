@@ -1,4 +1,4 @@
-# Assessing Data Store Capabilities for Polyglot Solutions
+# Assessing Data Store Capabilities for Polyglot Persistence Solutions
 
 ## Overview
 
