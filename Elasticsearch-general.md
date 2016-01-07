@@ -1,9 +1,9 @@
 # Implementing Elasticsearch on Azure
 
-- [Overview](#Overview)
-- [The Structure of Elasticsearch](#The Structure of Elasticsearch)
-	- [Clusters, Nodes, Indexes, and Shards](#Clusters, Nodes, Indexes, and Shards)
-	- [Node Roles](#Node Roles)
+- [Overview](#overview)
+- [The Structure of Elasticsearch](#the-structure-of-elasticsearch)
+	- [Clusters, Nodes, Indexes, and Shards](#clusters-nodes-indexes-and-shards)
+	- [Node Roles](#node-roles)
 	- [Costs and Benefits of Using Client Nodes](#)
 	- [Connecting to a Cluster](#)
 		- [Connection Load Balancing](#)
