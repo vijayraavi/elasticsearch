@@ -1,5 +1,40 @@
 # Implementing Elasticsearch on Azure
 
+- [Overview](#)
+- [The Structure of Elasticsearch](#)
+	- [Clusters, Nodes, Indexes, and Shards](#)
+	- [Node Roles](#)
+	- [Costs and Benefits of Using Client Nodes](#)
+	- [Connecting to a Cluster](#)
+		- [Connection Load Balancing](#)
+	- [Node Discovery](#)
+- [General System Guidelines](#)
+	- [Memory Requirements](#)
+	- [Disk and File System Requirements](#)
+	- [CPU Requirements](#)
+	- [Network Requirements](#)
+	- [Software Requirements](#)
+	- [Deploying Elasticsearch on Azure](#)
+- [Cluster and Node Sizing and Scalability Considerations](#)
+	- [Elasticsearch Topologies](#)
+		- [Geo-locating Clusters](#)
+		- [Small-scale Topologies](#)
+	- [Considerations for Scaling a Cluster and Data Nodes](#)
+		- [Scaling Elasticsearch Data Nodes Vertically](#)
+		- [Scaling an Elasticsearch Cluster Horizontally](#)
+	- [Determining the Number of Shards for an Index](#)
+	- [Security Considerations](#)
+	- [Securing Access to the Cluster](#)
+	- [Identifying and Authenticating Users](#)
+	- [Authorizing Client Requests](#)
+	- [Protecting the Cluster](#)
+	- [Protecting the Data](#)
+	- [Meeting Regulatory Requirements](#)
+	- [Monitoring Considerations](#)
+	- [Tools for Monitoring Elasticsearch](#)
+	- [Tools for Testing Elasticsearch Performance](#)
+- [Resources](#)
+
 ## Overview
 
 Elasticsearch is a highly scalable open-source search engine and database. It is suitable for situations that require fast analysis and discovery of information held in big datasets. Common scenarios include:
@@ -536,7 +571,7 @@ Other tools are available if you are benchmarking Elasticsearch or subjecting a 
 
 JMeter was used to perform benchmarking and other load tests described in documents related to this guidance. The document Running Performance Tests on Elasticsearch Using JMeter describes in detail how JMeter was configured and used.
 
-### Resources
+## Resources
 *	[Elasticsearch](https://www.elastic.co/products/elasticsearch)
 *	[Elasticsearch: The Definitive Guide](https://www.elastic.co/guide/en/elasticsearch/guide/master/index.html)
 *	[Sizes for Virtual Machines](https://azure.microsoft.com/documentation/articles/virtual-machines-size-specs/)
