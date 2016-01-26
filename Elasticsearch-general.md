@@ -1,5 +1,40 @@
 # Implementing Elasticsearch on Azure
 
+- [Overview](#overview)
+- [The Structure of Elasticsearch](#the-structure-of-elasticsearch)
+	- [Clusters, Nodes, Indexes, and Shards](#clusters-nodes-indexes-and-shards)
+	- [Node Roles](#node-roles)
+	- [Costs and Benefits of Using Client Nodes](#costs-and-benefits-of-using-client-nodes)
+	- [Connecting to a Cluster](#connecting-to-a-cluster)
+		- [Connection Load Balancing](#connection-load-balancing)
+	- [Node Discovery](#node-discovery)
+- [General System Guidelines](#general-system-guidelines)
+	- [Memory Requirements](#memory-requirements)
+	- [Disk and File System Requirements](#disk-and-file-system-requirements)
+	- [CPU Requirements](#cpu-requirements)
+	- [Network Requirements](#network-requirements)
+	- [Software Requirements](#software-requirements)
+	- [Deploying Elasticsearch on Azure](#deploying-elasticsearch-on-azure)
+- [Cluster and Node Sizing and Scalability Considerations](#cluster-node-sizing-and-scalability-considerations)
+	- [Elasticsearch Topologies](#elasticsearch-topologies)
+		- [Geo-locating Clusters](#geo-locating-clusters)
+		- [Small-scale Topologies](#small-scale-topologies)
+	- [Considerations for Scaling a Cluster and Data Nodes](#considerations-for-scaling-a-cluster-and-data-nodes)
+		- [Scaling Elasticsearch Data Nodes Vertically](#scaling-elasticsearch-data-nodes-vertically)
+		- [Scaling an Elasticsearch Cluster Horizontally](#scaling-an-elasticsearch-cluster-horizontally)
+	- [Determining the Number of Shards for an Index](#determining-the-number-of-shards-for-an-index)
+	- [Security Considerations](#security-considerations)
+	- [Securing Access to the Cluster](#securing-access-to-the-cluster)
+	- [Identifying and Authenticating Users](#identifying-and-authenticating-users)
+	- [Authorizing Client Requests](#authorizing-client-requests)
+	- [Protecting the Cluster](#protecting-the-cluster)
+	- [Protecting the Data](#protecting-the-data)
+	- [Meeting Regulatory Requirements](#meeting-regulatory-requirements)
+	- [Monitoring Considerations](#monitoring-considerations)
+	- [Tools for Monitoring Elasticsearch](#tools-for-monitoring-elasticsearch)
+	- [Tools for Testing Elasticsearch Performance](#tools-for-testing-elasticsearch-performance)
+- [Resources](#resources)
+
 ## Overview
 
 Elasticsearch is a highly scalable open-source search engine and database. It is suitable for situations that require fast analysis and discovery of information held in big datasets. Common scenarios include:
@@ -536,7 +571,7 @@ Other tools are available if you are benchmarking Elasticsearch or subjecting a 
 
 JMeter was used to perform benchmarking and other load tests described in documents related to this guidance. The document Running Performance Tests on Elasticsearch Using JMeter describes in detail how JMeter was configured and used.
 
-### Resources
+## Resources
 *	[Elasticsearch](https://www.elastic.co/products/elasticsearch)
 *	[Elasticsearch: The Definitive Guide](https://www.elastic.co/guide/en/elasticsearch/guide/master/index.html)
 *	[Sizes for Virtual Machines](https://azure.microsoft.com/documentation/articles/virtual-machines-size-specs/)
