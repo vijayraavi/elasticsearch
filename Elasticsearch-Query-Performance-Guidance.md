@@ -132,7 +132,8 @@ Elasticsearch uses mappings to determine how to interpret the data that occurs i
   }
   ```
 
-    For more information, see [Finding Exact Values](https://www.elastic.co/guide/en/elasticsearch/guide/current/_finding_exact_values.html#_term_filter_with_text).
+  For more information, see [Finding Exact Values](https://www.elastic.co/guide/en/elasticsearch/guide/current/_finding_exact_values.html#_term_filter_with_text).
+
 ---
 
 ### <span id="_Query_Tuning_1" class="anchor"><span id="Using_Doc_Values" class="anchor"></span></span>Using Doc Values
@@ -347,13 +348,15 @@ To help justify this conclusion, the following graphs illustrate the how the I/O
 
 <!-- -->
 
-** Figure 2. ** Disk activity for the D4 and DS4 clusters
+**Figure 2.**
+Disk activity for the D4 and DS4 clusters
 
 The graph for the D4 cluster shows significant variation, especially during the first half of the test. This was likely due to throttling to reduce the I/O rate. In the initial stages of the test, the queries are able to run quickly as there is little data to analyze. The disks in the D4 cluster are therefore likely to be operating close to their IOPS capacity, although each I/O operation might not be returning much data. The DS4 cluster is able to support a higher IOPS rate and does not suffer the same degree of throttling; the I/O rates are more regular. To support this theory, the next pair of graphs show how the CPU was blocked by disk I/O over time (the disk wait times shown in the graphs are the proportion of the time that the CPU spent waiting for I/O):
 
 ![](./figures/Elasticsearch/query-guidance-image3.png)
 
-** Figure 3. **CPU disk I/O wait times for the D4 and DS4 clusters
+**Figure 3.**
+CPU disk I/O wait times for the D4 and DS4 clusters
 
 It is important to understand that there are two predominant reasons for I/O operations to block the CPU:
 
@@ -414,7 +417,8 @@ These figures show that, for this test, the performance of the DS4 and DS14 clus
 
 ![](./figures/Elasticsearch/query-guidance-image4.png)
 
-** Figure 4.** Network utilization for the DS3, DS4, and DS14 clusters performing the *ingestion and query* test
+**Figure 4.**
+Network utilization for the DS3, DS4, and DS14 clusters performing the *ingestion and query* test
 
 <!-- -->
 
@@ -452,15 +456,17 @@ To isolate the effects of the ingestion operations and illustrate how query perf
 
 This time, the trends in the average response times across the different clusters is clearer. Network utilization is well below the 2.75GBps required earlier by the DS4 and DS14 clusters (which probably saturated the network in the ingestion and query tests), and the 1.5GBps for the DS3 cluster. In fact, it is closer to 200MBps in all cases as shown by the graphs below:
 
-![](./figures/elasticsearch/query-guidance-image5.png)
+![](./figures/Elasticsearch/query-guidance-image5.png)
 
-** Figure 5.** Network utilization for the DS3, DS4 and DS14 clusters performing the *query-only* test
+**Figure 5.**
+Network utilization for the DS3, DS4 and DS14 clusters performing the *query-only* test
 
 The limiting factor in the DS3 and DS4 clusters now appears to be CPU utilization, which is close to 100% for much of the time. In the DS14 cluster the CPU usage averages just over 80%. This is still high, but clearly highlights the advantages of having more CPU cores available. The following image depicts the CPU usage patterns for the DS3, DS4, and DS14 clusters.
 
-![](./figures/elasticsearch/query-guidance-image6.png)
+![](./figures/Elasticsearch/query-guidance-image6.png)
 
-** Figure 6.** CPU utilization for the DS3 and DS14 clusters performing the *query-only* test
+**Figure 6.**
+CPU utilization for the DS3 and DS14 clusters performing the *query-only* test
 
 ### Performance Results – Scaling Out
 
@@ -498,7 +504,8 @@ The number of nodes makes a significant difference in the query performance of t
 
 ![](./figures/Elasticsearch/query-guidance-image7.png)
 
-** Figure 7. **CPU utilization for the 1, 3, and 6-node clusters performing the *query-only* test
+**Figure 7.**
+CPU utilization for the 1, 3, and 6-node clusters performing the *query-only* test
 
 The single-node and 3-node clusters are CPU-bound, while although CPU utilization is high in the 6-node cluster there is spare processing capacity available. In this case, other factors are likely to be limiting the throughput. This could be confirmed by testing with 9 and 12 nodes, which would likely show further spare processing capacity.
 
@@ -532,7 +539,8 @@ The ingestion rate decreased as the number of replicas increased. This should be
 
 ![](./figures/Elasticsearch/query-guidance-image8.png)
 
-** Figure 8. **Disk I/O rates for nodes with 1 and 2 replicas performing the *ingestion and query* test
+**Figure 8.**
+Disk I/O rates for nodes with 1 and 2 replicas performing the *ingestion and query* test
 
 | Cluster | Query                      | Average Response Time (ms) – 1 Replica | Average Response Time (ms) – 2 Replicas |
 |---------|----------------------------|----------------------------------------|-----------------------------------------|
@@ -576,13 +584,15 @@ This data shows that the number of queries performed by the DS4 cluster increase
 
 ![](./figures/Elasticsearch/query-guidance-image9.png)
 
-** Figure 9. **CPU utilization for the least-used and most-used nodes in the DS4 cluster performing the *query-only* test
+**Figure 9.**
+CPU utilization for the least-used and most-used nodes in the DS4 cluster performing the *query-only* test
 
 For the DS14 cluster this was not the case. CPU utilization for both tests was lower across all nodes, and the availability of a second replica became less of an advantage and more of an overhead:
 
 ![](./figures/Elasticsearch/query-guidance-image10.png)
 
-** Figure 10. **CPU utilization for the least-used and most-used nodes in the DS14 cluster performing the *query-only* test
+**Figure 10.**
+CPU utilization for the least-used and most-used nodes in the DS14 cluster performing the *query-only* test
 
 These results show the need to benchmark your system carefully when deciding whether to use multiple replicas. You should always have at least one replica of each index (unless you are willing to risk losing data if a node fails), but additional replicas can impose a burden on the system for little benefit, depending on your workloads and the hardware resources available to the cluster.
 
@@ -631,13 +641,15 @@ The improved ingestion rates occur with doc values disabled as less data is bein
 
 ![](./figures/Elasticsearch/query-guidance-image11.png)
 
-** Figure 11. **Disk activity for the D4 cluster with doc values enabled and disabled
+**Figure 11.**
+Disk activity for the D4 cluster with doc values enabled and disabled
 
 In contrast, the ingestion values for the VMs using SSDs show a small increase in the number of documents but also an increase in the response time of the ingestion operations. With one or two small exceptions, the query response times were also worse. The SSDs are less likely to be running close to their IOPS limits with doc values enabled, so changes in performance are more likely due to increased processing activity and the overhead of managing the JVM heap. This is evident by comparing the CPU utilization with doc values enabled and disabled. The next graph highlights this data for the DS4 cluster, where most of the CPU utilization moves from the 30%-40% band with doc values enabled, to the 40%-50% band with doc values disabled (the DS14 cluster showed a similar trend):
 
 ![](./figures/Elasticsearch/query-guidance-image12.png)
 
-** Figure 12. **CPU utilization for the DS4 cluster with doc values enabled and disabled
+**Figure 12.**
+CPU utilization for the DS4 cluster with doc values enabled and disabled
 
 To distinguish the effects that doc values on query performance from data ingestion, pairs of query-only tests were performed for the DS4 and DS14 clusters with doc values enabled and disabled. The table below summarizes the results of these tests:
 
@@ -741,25 +753,29 @@ You can see that although the ingestion rate when caching was enabled was approx
 
 ![](./figures/Elasticsearch/query-guidance-image13.png)
 
-** Figure 13. **Disk I/O activity for the *ingestion and query* test with index caching disabled and enabled
+**Figure 13.**
+Disk I/O activity for the *ingestion and query* test with index caching disabled and enabled
 
 The decrease in disk I/O also meant that the CPU spent less time waiting for I/O to complete. This is highlighted by figure 14:
 
 ![](./figures/Elasticsearch/query-guidance-image14.png)
 
-** Figure 14. **CPU time spent waiting for disk I/O to complete for the *ingestion and query* test with index caching disabled and enabled
+**Figure 14.**
+CPU time spent waiting for disk I/O to complete for the *ingestion and query* test with index caching disabled and enabled
 
 The reduction in disk I/O meant that Elasticsearch could spend a much greater proportion of its time servicing queries from data held in memory. This increased CPU utilization, which becomes apparent if you look at the CPU utilization for all four cases. The graphs below show how CPU use was more sustained with caching enabled:
 
 ![](./figures/Elasticsearch/query-guidance-image15.png)
 
-** Figure 15. **CPU utilization for the *ingestion and query* test with index caching disabled and enabled
+**Figure 15.**
+CPU utilization for the *ingestion and query* test with index caching disabled and enabled
 
 The volume of network I/O in both scenarios for the duration of the tests was broadly similar. The tests without caching showed a gradual degradation during the test period, but the longer, 24 hour runs of these tests showed that this statistic levelled off at approximately 2.75GBps. The image below shows this data for the DS4 clusters (the data for the DS14 clusters was very similar):
 
 ![](./figures/Elasticsearch/query-guidance-image16.png)
 
-** Figure 16. **Network traffic volumes for the *ingestion and query* test with index caching disabled and enabled
+**Figure 16.**
+Network traffic volumes for the *ingestion and query* test with index caching disabled and enabled
 
 As described in the [Scaling Up](#performance-results-scaling-up) test, the restrictions to network bandwidth with Azure VMs are not published and can vary, but the moderate levels of CPU and disk activity suggests that network utilization may be the limiting factor in this scenario.
 
@@ -788,7 +804,8 @@ The variance in the performance of the non-cached tests is due to the difference
 
 ![](./figures/Elasticsearch/query-guidance-image17.png)
 
-** Figure 17. **Disk I/O, CPU utilization, and network utilization for the *query-only* test with index caching enabled
+**Figure 17.**
+Disk I/O, CPU utilization, and network utilization for the *query-only* test with index caching enabled
 
 The figures in the table above suggest that using the DS14 architecture shows little benefit over using the DS4. In fact, the number of samples generated by the DS14 cluster was about 5% below that of the DS4 cluster, but this could also be due to network restrictions which can vary slightly over time.
 
@@ -812,13 +829,15 @@ These results indicate that there is a significant difference in performance bet
 
 ![](./figures/Elasticsearch/query-guidance-image18.png)
 
-** Figure 18. **CPU utilization for the *query-only* test on the 7(14) shard cluster
+**Figure 18.**
+CPU utilization for the *query-only* test on the 7(14) shard cluster
 
 Compare these figures with those of the 23(46) shard test:
 
 ![](./figures/Elasticsearch/query-guidance-image19.png)
 
-** Figure 19. **CPU utilization for the *query-only* test on the 23(46) shard cluster
+**Figure 19.**
+CPU utilization for the *query-only* test on the 23(46) shard cluster
 
 In the 23(46) shard test, CPU utilization was far higher. Each node contains 7 or 8 shards. The DS14 architecture provides 16 processors, and Elasticsearch is better able to exploit this number of cores with the additional shards. The figures in the table above suggest that increasing the number of shards beyond this point may improve performance slightly, but you should offset these figures against the additional overhead of maintaining a high volume of shards. The sweet spot for these tests implies that the optimal number of shards per node is half the number of processor cores available on each node. However, remember that these results were achieved when only running queries. If your system imports data, you should also consider how sharding can impact the performance of data ingestion operations. For further information on this aspect refer to the document [Maximizing Data Ingestion Performance with Elasticsearch on Azure](https://github.com/mspnp/azure-guidance/blob/master/Elasticsearch-Data-Ingestion-Performance.md).
 
