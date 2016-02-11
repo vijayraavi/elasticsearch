@@ -25,13 +25,13 @@ The tests are run using JMeter. A JMeter Master server loads a test plan and pas
 
 The following test plans are provided:
 
-* [elasticsearchautotestplan3nodes.jmx](./ingestion-and-query-tests/templateselasticsearchautotestplan3nodes.jmx). This test plan runs the ingestion test over a 3-node cluster.
+* [elasticsearchautotestplan3nodes.jmx](./ingestion-and-query-tests/templates/elasticsearchautotestplan3nodes.jmx). This test plan runs the ingestion test over a 3-node cluster.
 
-* [elasticsearchautotestplan6nodes.jmx](./ingestion-and-query-tests/templateselasticsearchautotestplan6nodes.jmx). This test plan runs the ingestion test over a 6-node cluster.
+* [elasticsearchautotestplan6nodes.jmx](./ingestion-and-query-tests/templates/elasticsearchautotestplan6nodes.jmx). This test plan runs the ingestion test over a 6-node cluster.
 
-* [elasticsearchautotestplan6qnodes.jmx](./ingestion-and-query-tests/templateselasticsearchautotestplan6qnodes.jmx). This test plan runs the ingestion and query test over a 6-node cluster.
+* [elasticsearchautotestplan6qnodes.jmx](./ingestion-and-query-tests/templates/elasticsearchautotestplan6qnodes.jmx). This test plan runs the ingestion and query test over a 6-node cluster.
 
-* [elasticsearchautotestplan6nodesqueryonly.jmx](./ingestion-and-query-tests/templateselasticsearchautotestplan6nodesqueryonly.jmx). This test plan runs the query-only test over a 6-node cluster.
+* [elasticsearchautotestplan6nodesqueryonly.jmx](./ingestion-and-query-tests/templates/elasticsearchautotestplan6nodesqueryonly.jmx). This test plan runs the query-only test over a 6-node cluster.
 
 ---
 
