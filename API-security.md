@@ -15,6 +15,7 @@ Consider the following security challenges when designing and implementing a ser
 	- Maintain audit logs in order to counter repudiation challenges.
 	- Monitor API usage and detect non-standard usage patterns.
 	- Implement IP restrictions and rate limits on API usage. For more information, see the section on [Threat mitigation](#insertlink#).
+
 ## Authentication
 There are several mechanisms for authentication, with a major trade-off between them being the strength of the security against the simplicity of use. For example, some use a pre-configured key whereas others use certificates or tokens to provide a more flexible and robust security mechanism. Choosing the appropriate mechanism requires consideration for the size of the user community (for example, is authentication limited to a small number of consumers or a large number of public consumers); the way that client identity is determined (such as a corporate directory, a token service, or a social identity provider); and the business requirements such as administration (managing keys and secrets), the benefits it provides for API consumers, and other related factors.
 
