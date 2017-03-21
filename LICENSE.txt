@@ -1,4 +1,4 @@
-Azure Guidance
+Running Elasticsearch on Azure
 
 Copyright (c) Microsoft Corporation
 
